@@ -553,3 +553,48 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
   return(list(Y=Y,EPS=EPS,ETA=ETA,V=V))
 }
 
+
+make.PHI2 <- function(Phi){
+  p <- dim(Phi)[3]
+  n <- dim(Phi)[1]
+  PHI <- matrix(0,n*p,n*p)
+  if(p>1){
+    PHI[(n+1):(n*p),1:((p-1)*n)] <- diag((p-1)*n)
+  }
+  for(i in 1:p){
+    PHI[1:n,((i-1)*n+1):(i*n)] <- Phi[,,i]
+  }
+  return(PHI)
+}
+
+
+simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
+  # Simulation of independent shocks
+  eps <- NULL
+  nb.var <- length(distri$type) # number of variables
+  if(is.na(basic.drawings[1])){
+    U <- matrix(runif(nb.var*nb.sim),nb.sim,nb.var)
+  }else{
+    if(dim(basic.drawings)[1]!=nb.sim){
+      print("Dimension of basic.drawing not consistent with nb.sim")
+      return(0)
+    }else{
+      U <- basic.drawings
+    }
+  }
+
+  for(i in 1:nb.var){
+    if(distri$type[i]=="gaussian"){
+      eps.i <- qnorm(U[,i])
+    }else if(distri$type[i]=="mixt.gaussian"){
+      eps.i <- qmixt(alpha=U[,i],distri$mu[i],distri$sigma[i],distri$p[i])
+    }else if(distri$type[i]=="student"){
+      nu <- distri$df[i]
+      eps.i <- qt(U[,i],df = nu)/sqrt(nu/(nu-2))
+    }
+    eps <- cbind(eps,eps.i)
+  }
+  return(eps)
+}
+
+
