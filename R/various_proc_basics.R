@@ -543,7 +543,7 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
 }
 
 make.PHI <- function(Phi){
-  if(class(PHi)=="list"){
+  if(class(Phi)=="list"){
     p <- length(Phi)
     n <- dim(Phi[[1]])[1]
   }else{
@@ -555,7 +555,7 @@ make.PHI <- function(Phi){
     PHI[(n+1):(n*p),1:((p-1)*n)] <- diag((p-1)*n)
   }
   for(i in 1:p){
-    if(class(PHi)=="list"){
+    if(class(Phi)=="list"){
       PHI[1:n,((i-1)*n+1):(i*n)] <- Phi[[i]]
     }else{
       PHI[1:n,((i-1)*n+1):(i*n)] <- Phi[,,i]
