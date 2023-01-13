@@ -93,18 +93,6 @@
 # }
 #
 #
-# make.PHI <- function(Phi){
-#   p <- length(Phi)
-#   n <- dim(Phi[[1]])[1]
-#   PHI <- matrix(0,n*p,n*p)
-#   if(p>1){
-#     PHI[(n+1):(n*p),1:((p-1)*n)] <- diag((p-1)*n)
-#   }
-#   for(i in 1:p){
-#     PHI[1:n,((i-1)*n+1):(i*n)] <- Phi[[i]]
-#   }
-#   return(PHI)
-# }
 #
 #
 # compute.fevd <- function(Phi,B,H){
@@ -520,7 +508,7 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
   }
 
   MU <- c(Model$Mu,rep(0,n*(p-1)))
-  PHI <- make.PHI2(Model$Phi)
+  PHI <- make.PHI(Model$Phi)
   THETA <- cbind(diag(n),-matrix(Model$Theta,nrow=n))
   THETA <- rbind(THETA,matrix(0,n*(p-1),n*(q+1)))
   CC <- diag(q+1) %x% Model$C
@@ -554,20 +542,27 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
   return(list(Y=Y,EPS=EPS,ETA=ETA,V=V))
 }
 
-
-make.PHI2 <- function(Phi){
-  p <- dim(Phi)[3]
-  n <- dim(Phi)[1]
+make.PHI <- function(Phi){
+  if(class(PHi)=="list"){
+    p <- length(Phi)
+    n <- dim(Phi[[1]])[1]
+  }else{
+    p <- dim(Phi)[3]
+    n <- dim(Phi)[1]
+  }
   PHI <- matrix(0,n*p,n*p)
   if(p>1){
     PHI[(n+1):(n*p),1:((p-1)*n)] <- diag((p-1)*n)
   }
   for(i in 1:p){
-    PHI[1:n,((i-1)*n+1):(i*n)] <- Phi[,,i]
+    if(class(PHi)=="list"){
+      PHI[1:n,((i-1)*n+1):(i*n)] <- Phi[[i]]
+    }else{
+      PHI[1:n,((i-1)*n+1):(i*n)] <- Phi[,,i]
+    }
   }
   return(PHI)
 }
-
 
 simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
   # Simulation of independent shocks
