@@ -1,7 +1,6 @@
 Package: IdSS
 Type: Package
-Title: This package contains codes allowing to identifiy structural shocks in the
-context of vector autoregressive models.
+Title: This package contains codes allowing to identifiy structural shocks in the context of vector autoregressive models.
 Version: 0.1.0
 Author: Kenza Benhima and Jean-Paul Renne
 Maintainer: jean-paul.renne@unil.ch
