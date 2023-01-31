@@ -433,7 +433,6 @@ svar.ordering.aux <- function(Y,p,
 }
 
 
-
 make.jorda.irf <- function(Y,
                            posit.of.shock = 1,
                            nb.periods.IRF = 20,
@@ -449,7 +448,7 @@ make.jorda.irf <- function(Y,
   mat.of.results <- matrix(NaN,nb.periods.IRF+1,n)
   all.stdv.IRFs <- matrix(NaN,nb.periods.IRF+1,n)
   for(h in 0:nb.periods.IRF){
-    print(paste("Jorda's approach, Currently working on horizon h=",toString(h),sep=""))
+    message(paste("Jorda's approach, Currently working on horizon h=",toString(h),sep=""))
     for(i in 1:n){
       y.i.t.p.h <- Y[(h+1+nb.lags.endog.var.4.control):T,i]
       X <- Y[(1+nb.lags.endog.var.4.control):(T-h),1:posit.of.shock]
@@ -524,7 +523,7 @@ make.LPIV.irf <- function(Y,Z,
   all.stdv.IRFs <- matrix(NaN,nb.periods.IRF+1,n)
 
   for(h in 0:nb.periods.IRF){
-    print(paste("LP-IV approach, Currently working on horizon h=",toString(h),sep=""))
+    message(paste("LP-IV approach, Currently working on horizon h=",toString(h),sep=""))
 
     for(i in 1:n){
       ZZ <- matrix(Z[(1+max.nb.lags.control):(T-h),],ncol=1)

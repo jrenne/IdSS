@@ -145,3 +145,4 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
   }
   return(eps)
 }
+

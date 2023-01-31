@@ -17,20 +17,20 @@ svar.ordering.2 <- function(Y,p,
                           confidence.interval = 0.90, # expressed in pp.
                           indic.plot = 1 # Plots are displayed if = 1.
 ){
-  
+
   names.of.variables <- colnames(Y)
-  
+
   T <- dim(Y)[1]
   n <- dim(Y)[2]
-  
+
   baseline.res <- svar.ordering.aux(Y,p,
                                     posit.of.shock,
                                     nb.periods.IRF)
   IRFs <- baseline.res$IRFs
-  
+
   if (inference >0){
     # If inference, simulate a set of IRFs using one of the following methods:
-    
+
     # Parametric bootstrap
     if (inference == 1){
     simulated.res <- param.bootstrap(Y,p,
@@ -70,7 +70,7 @@ svar.ordering.2 <- function(Y,p,
       # store the set of simulated IRFs
       all.simulated.IRFs.res <- simulated.res$simulated.IRFs
     }
-    
+
     # compute some key moments of the simulated IRFs
     all.stdv.IRFs <- NULL
     all.CI.lower.bounds <- NULL
@@ -78,10 +78,10 @@ svar.ordering.2 <- function(Y,p,
     all.CI.median <- NULL
     for(i in 1:n){
       all.IRFs.i <- matrix(all.simulated.IRFs.res[,i,],ncol=nb.draws)
-      
+
       stdv.IRF <- apply(all.IRFs.i,1,sd)
       all.stdv.IRFs <- cbind(all.stdv.IRFs,stdv.IRF)
-      
+
       all.CI.lower.bounds <- cbind(all.CI.lower.bounds,
                                    apply(all.IRFs.i,1,
                                          function(x){quantile(x,(1-confidence.interval)/2)}))
@@ -92,17 +92,17 @@ svar.ordering.2 <- function(Y,p,
                                    apply(all.IRFs.i,1,
                                          function(x){quantile(x,0.5)}))
     }
-    
+
   }else{
   #if no inference, simply use the estimated IRFs
-    
+
     all.simulated.IRFs.res <- NULL
     all.stdv.IRFs <- NULL
     all.CI.lower.bounds <- IRFs
     all.CI.upper.bounds <- IRFs
     all.CI.median <- IRFs
   }
-  
+
   # here we plot the IRFs (if asked)
   if(indic.plot==1){
     par(mfrow=c(2,ifelse(round(n/2)==n/2,n/2,(n+1)/2)))
@@ -118,7 +118,7 @@ svar.ordering.2 <- function(Y,p,
       }
     }
   }
-  
+
   return(
     list(
       IRFs = IRFs,
@@ -221,15 +221,15 @@ montecarlo <- function(Y,p,
   IRFs <- baseline.res$IRFs
   est.VAR <- baseline.res$est.VAR
   Phi <- Acoef(est.VAR)
-  B.hat <- baseline.res$B.hat   
+  B.hat <- baseline.res$B.hat
   cst <- Bcoef(est.VAR)[,p*n+1]
   resids <- residuals(est.VAR)
   Omega <- var(resids)
-  
+
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
   simulated.Phi   <- replicate(nb.draws, Phi)
-  
+
   # Get the asymptotic distribution of estimated coefficients
   distrib.phi.res <- distrib.phi(Y,p,Phi,cst,Omega,n)
   phi             <- distrib.phi.res$phi
@@ -239,7 +239,7 @@ montecarlo <- function(Y,p,
   omega             <- distrib.omega.res$omega
   var.omega         <- distrib.omega.res$var.omega
   Omega.simul       <- array(0,c(n,n))
-  
+
   i<-0
   xx<-0
   # Perform the simulations
@@ -259,9 +259,9 @@ montecarlo <- function(Y,p,
       break
     }else{
       xx<-xx+1
+      # here draw Phi
       phi.simul       <- mvrnorm(1, phi, var.phi)
       B.hat.simul <- t(chol(Omega.simul))
-      # here draw Phi
       phi.simul.temp <- t(matrix(phi.simul,ncol=n,nrow=1+n*p))
       for (j in 1:p){ Phi.simul[[j]] <- phi.simul.temp[,(2+(j-1)*n):(1+j*n)]}
       # Simulate IRFs for all shocks or just one
@@ -272,8 +272,8 @@ montecarlo <- function(Y,p,
                                     y0.star=rep(0,n*p),
                                     indic.IRF = 1,
                                     diag(n)[,posit.of.shock])
-        
-        simulated.IRFs[,,xx] <- IRFs.simul      
+
+        simulated.IRFs[,,xx] <- IRFs.simul
       }else{
       IRFs.simul <- simul.VAR.all(c=rep(0,n),n,Phi.simul,
                                   B.hat.simul,
@@ -281,7 +281,7 @@ montecarlo <- function(Y,p,
                                   y0.star=rep(0,n*p),
                                   indic.IRF = 1,
                                   diag(n))
-      
+
       simulated.IRFs[,,,xx] <- IRFs.simul
       }
       simulated.B.hat[,,xx] <- B.hat.simul
@@ -305,7 +305,7 @@ param.bootstrap <- function(Y,p,
                             posit.of.shock = 0 # =0 to simulate for all shocks
                             ){
 
-  
+
   # Estimate IRFs for all shocks or just one
   if (posit.of.shock !=0){
     baseline.res <- svar.ordering.aux(Y,p,
@@ -320,24 +320,24 @@ param.bootstrap <- function(Y,p,
   IRFs <- baseline.res$IRFs
   est.VAR <- baseline.res$est.VAR
   Phi <- Acoef(est.VAR)
-  B.hat <- baseline.res$B.hat   
+  B.hat <- baseline.res$B.hat
   cst <- Bcoef(est.VAR)[,p*n+1]
-  
+
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
   simulated.Phi   <- replicate(nb.draws, Phi)
-  
+
   y0.star <- NULL
   for(k in p:1){
     y0.star <- c(y0.star,Y[k,])
   }
-  
+
   # Perform the simulations
   for(i in 1:nb.draws){
     # Simulate T observations
     simulated.Y <- simul.VAR(cst,Phi,B.hat,nb.sim=dim(Y)[1],y0.star)
     colnames(simulated.Y) <- colnames(Y)
-    
+
     # Estimate IRFs on simulated data for all shocks or just one
     if (posit.of.shock!=0){
     simulated.res <- svar.ordering.aux(simulated.Y,p,
@@ -350,13 +350,13 @@ param.bootstrap <- function(Y,p,
                                        n)
     simulated.IRFs[,,,i] <- simulated.res$IRFs
     }
-    
+
     simulated.B.hat[,,i] <- simulated.res$B.hat
     simulated.est.VAR <- simulated.res$est.VAR
     simulated.Phi[,i] <- Acoef(simulated.est.VAR)
   }
 
-  
+
   return(list(simulated.IRFs = simulated.IRFs,
               simulated.B.hat = simulated.B.hat,
               simulated.Phi = simulated.Phi))
@@ -385,19 +385,19 @@ nonparam.bootstrap <- function(Y,p,
   IRFs <- baseline.res$IRFs
   est.VAR <- baseline.res$est.VAR
   Phi <- Acoef(est.VAR)
-  B.hat <- baseline.res$B.hat   
+  B.hat <- baseline.res$B.hat
   cst <- Bcoef(est.VAR)[,p*n+1]
   resids <- residuals(est.VAR)
-  
+
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
   simulated.Phi   <- replicate(nb.draws, Phi)
-  
+
   y0.star <- NULL
   for(k in p:1){
     y0.star <- c(y0.star,Y[k,])
   }
-  
+
   # Perform the simulations
   for(i in 1:nb.draws){
     # draw set residuals from estimated ones
@@ -406,7 +406,7 @@ nonparam.bootstrap <- function(Y,p,
     # Simulate T observations
     simulated.Y <- simul.VAR(cst,Phi,B = diag(n),nb.sim=dim(Y)[1],y0.star,indic.IRF = 0,eta = simul.residuals)
     colnames(simulated.Y) <- colnames(Y)
-    
+
     # Estimate IRFs on simulated data for all shocks or just one
     if (posit.of.shock!=0){
       simulated.res <- svar.ordering.aux(simulated.Y,p,
@@ -419,13 +419,13 @@ nonparam.bootstrap <- function(Y,p,
                                          n)
       simulated.IRFs[,,,i] <- simulated.res$IRFs
     }
-    
+
     simulated.B.hat[,,i] <- simulated.res$B.hat
     simulated.est.VAR <- simulated.res$est.VAR
     simulated.Phi[,i] <- Acoef(simulated.est.VAR)
   }
-  
-  
+
+
   return(list(simulated.IRFs = simulated.IRFs,
               simulated.B.hat = simulated.B.hat,
               simulated.Phi = simulated.Phi))
@@ -454,22 +454,22 @@ bootstrap.after.bootstrap <- function(Y,p,
   IRFs <- baseline.res$IRFs
   est.VAR <- baseline.res$est.VAR
   Phi <- Acoef(est.VAR)
-  B.hat <- baseline.res$B.hat   
+  B.hat <- baseline.res$B.hat
   cst <- Bcoef(est.VAR)[,p*n+1]
   resids <- residuals(est.VAR)
   phi <- VEC.coef(Phi,c(n,0),n,p)
-  
-  
+
+
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
   simulated.Phi   <- replicate(nb.draws, Phi)
   simulated.phi   <- array(replicate(nb.draws, phi, simplify="array"),c(dim(phi)[1],nb.draws))
-  
+
   y0.star <- NULL
   for(k in p:1){
     y0.star <- c(y0.star,Y[k,])
   }
-  
+
   # FIRST BOOTSTRAP
   # Perform the simulations
   for(i in 1:nb.draws){
@@ -479,7 +479,7 @@ bootstrap.after.bootstrap <- function(Y,p,
     # Simulate T observations
     simulated.Y <- simul.VAR(cst,Phi,B = diag(n),nb.sim=dim(Y)[1],y0.star,indic.IRF = 0,eta = simul.residuals)
     colnames(simulated.Y) <- colnames(Y)
-    
+
     # Estimate IRFs on simulated data for all shocks or just one
     if (posit.of.shock!=0){
       simulated.res <- svar.ordering.aux(simulated.Y,p,
@@ -492,12 +492,12 @@ bootstrap.after.bootstrap <- function(Y,p,
                                          n)
       simulated.IRFs[,,,i] <- simulated.res$IRFs
     }
-    
+
     simulated.est.VAR <- simulated.res$est.VAR
     simulated.Phi.temp <- Acoef(simulated.est.VAR)
     simulated.phi[,i] <- VEC.coef(simulated.Phi.temp,c(n,1),n,p)
   }
-  
+
   # Compute the bias
   median.simulated.phi <- apply(simulated.phi,1,function(x){quantile(x,0.5)})
   bias <- median.simulated.phi-phi
@@ -524,7 +524,7 @@ bootstrap.after.bootstrap <- function(Y,p,
     # Simulate T observations
     simulated.Y <- simul.VAR(cst,unbiased.Phi,B = diag(n),nb.sim=dim(Y)[1],y0.star,indic.IRF = 0,eta = simul.residuals)
     colnames(simulated.Y) <- colnames(Y)
-    
+
     # Estimate IRFs on simulated data for all shocks or just one
     if (posit.of.shock!=0){
       simulated.res <- svar.ordering.aux(simulated.Y,p,
@@ -535,7 +535,7 @@ bootstrap.after.bootstrap <- function(Y,p,
                                          nb.periods.IRF,
                                          n)
     }
-    
+
     simulated.B.hat[,,i] <- simulated.res$B.hat
     simulated.est.VAR <- simulated.res$est.VAR
     simulated.Phi.temp <- Acoef(simulated.est.VAR)
@@ -554,8 +554,8 @@ bootstrap.after.bootstrap <- function(Y,p,
                               y0.star=rep(0,n*p),
                               indic.IRF = 1,
                               diag(n)[,posit.of.shock])
-      
-      simulated.IRFs[,,i] <- IRFs.simul      
+
+      simulated.IRFs[,,i] <- IRFs.simul
     }else{
       IRFs.simul <- simul.VAR.all(c=rep(0,n),n,simulated.Phi[,i],
                                   simulated.B.hat[,,i],
@@ -563,11 +563,11 @@ bootstrap.after.bootstrap <- function(Y,p,
                                   y0.star=rep(0,n*p),
                                   indic.IRF = 1,
                                   diag(n))
-      
+
       simulated.IRFs[,,,i] <- IRFs.simul
     }
     }
-  
+
   return(list(simulated.IRFs = simulated.IRFs,
               simulated.B.hat = simulated.B.hat,
               simulated.Phi = simulated.Phi))
@@ -590,14 +590,14 @@ svar.ordering.all <- function(Y,p,
     dim(IRFs.j) <- c(nb.periods.IRF,n,1)
     IRFs[,j,] <- aperm(IRFs.j, c(2,3,1))
   }
-  
+
   est.VAR <- baseline.res$est.VAR
   Phi     <- Acoef(est.VAR)
   B.hat   <- baseline.res$B.hat
   cst     <- Bcoef(est.VAR)[,p*n+1]
   resids  <- residuals(est.VAR)
   Omega   <- var(resids)
-  
+
   return(list(
     IRFs = IRFs,
     est.VAR = est.VAR,
@@ -621,7 +621,7 @@ simul.VAR.all <- function(c=rep(0,n),n,Phi,
 ){
   IRFs <- array(NaN,c(n,n,nb.periods.IRF))
   # Call simul.VAR for all shocks
-  for (j in 1:n){ 
+  for (j in 1:n){
     IRFs.j <- simul.VAR(c=rep(0,n),
                         Phi,
                         B.hat,
