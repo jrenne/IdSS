@@ -67,7 +67,7 @@ tsls <- function(Y,X,Z,q){
   T <- length(Y)
 
   # Compute the IV estimator:
-  PZ <- solve(t(Z)%*%Z) %*% t(Z)
+  PZ <- Z %*% solve(t(Z)%*%Z) %*% t(Z)
   Y.hat <- PZ %*% Y
   X.hat <- PZ %*% X
   PX.hat <- solve(t(X.hat)%*%X.hat) %*% t(X.hat)
