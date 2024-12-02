@@ -77,7 +77,9 @@ tsls <- function(Y,X,Z,q){
   eps <- Y - X %*% b.iv
 
   # Approximation of the covariance matrix of b.iv:
-  Q <- T * solve(t(X) %*% Z %*% solve(t(Z)%*%Z) %*% t(Z) %*% X) %*% t(X.hat)
+  # Q <- T * solve(t(X) %*% Z %*% solve(t(Z)%*%Z) %*% t(Z) %*% X) %*% t(X.hat)
+  Q <- T * solve(t(X) %*% Z %*% solve(t(Z)%*%Z) %*% t(Z) %*% X) %*%
+    t(solve(t(Z)%*%Z) %*% t(Z) %*% X)
 
   Z.times.eps <- Z * matrix(eps,dim(Z)[1],dim(Z)[2])
   S <- NW.LongRunVariance(Z.times.eps,q)
@@ -256,7 +258,7 @@ svar.iv.aux <- function(Y,Z,p,
   for(i in 1:n){
     YY <- matrix(resids[,i],ncol=1)
     XX <- matrix(resids[,1],ncol=1)
-    ZZ <- matrix(Z[(1+p):length(Z)],ncol=1)
+    ZZ <- matrix(Z[(1+p):dim(Z)[1],],ncol=dim(Z)[2])
     eq.iv <- tsls(YY,XX,ZZ,q=3)
     B.tilde.1[i] <- eq.iv$b.iv
     #stdv.B.tilde.1[i] <- sqrt(eq.iv$covmat.b.iv)

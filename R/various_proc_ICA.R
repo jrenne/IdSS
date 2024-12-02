@@ -20,7 +20,7 @@ estim.SVAR.ICA <- function(endog.var,distri,p){
   P <- t(chol(var(eps)))
   Y <- eps %*% solve(t(P))
 
-  AA.0 <- c(0,0,0)
+  AA.0 <- rep(0,n*(n-1)/2)
   res.optim <- optim(AA.0,func.2.minimize,
                      Y = Y,
                      distri = distri,
