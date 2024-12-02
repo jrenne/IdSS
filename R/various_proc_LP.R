@@ -528,7 +528,7 @@ make.LPIV.irf <- function(Y,Z,
     message(paste("LP-IV approach, Currently working on horizon h=",toString(h),sep=""))
 
     for(i in 1:n){
-      ZZ <- matrix(Z[(1+max.nb.lags.control):(T-h),],ncol=1)
+      ZZ <- matrix(Z[(1+max.nb.lags.control):(T-h),],ncol=dim(Z)[2])
       X  <- matrix(Y[(1+max.nb.lags.control):(T-h),1],ncol=1)
 
       y.i.t.p.h <- matrix(Y[(h+1+max.nb.lags.control):T,i],ncol=1)
