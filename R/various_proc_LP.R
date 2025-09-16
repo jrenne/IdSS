@@ -268,10 +268,10 @@ svar.iv.aux <- function(Y,Z,p,
   B.tilde <- matrix(0,n,n)
   B.tilde[,1] <- B.tilde.1
 
-  y0.star <- rep(0,dim(y)[2]*p)
+  y0.star <- rep(0,dim(Y)[2]*p)
 
   nb.sim <- nb.periods.IRF
-  IRFs <- simul.VAR(c=rep(0,dim(y)[2]),
+  IRFs <- simul.VAR(c=rep(0,dim(Y)[2]),
                     Phi,
                     B.tilde,
                     nb.sim,
@@ -398,7 +398,7 @@ svar.ordering.aux <- function(Y,p,
   n <- dim(Y)[2]
 
   # Select number of lags in VAR models:
-  #VARselect(y)
+  #VARselect(Y)
 
   est.VAR <- VAR(Y,p=p)
 
