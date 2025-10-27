@@ -4,10 +4,8 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
   # Phi is a list, each element of which is a Phi_i matrix. Hence it has p elements if we consider a VAR(p)
   # If eta is different from NaN then the structural shocks are those defined in this
   #      matrix of dimension (nb.sim x n)
-  p <- length(Phi)
-  n <- dim(Phi[[1]])[1]
 
-  # If Phi is an array, convert it into a list:
+  # Make sure Phi is a list, convert it if this is not the case:
   if(class(Phi)[1]!="list"){
     if(class(Phi)[1]=="matrix"){
       Phi <- list(Phi)
@@ -15,6 +13,9 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
       Phi <- lapply(seq_len(dim(Phi)[3]), function(k) Phi[ , , k])
     }
   }
+
+  p <- length(Phi)
+  n <- dim(Phi[[1]])[1]
 
   # Check that right dimension for y0.star:
   if((indic.IRF==0)&(length(y0.star)!=(n*p))){
