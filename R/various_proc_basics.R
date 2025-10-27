@@ -46,53 +46,80 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
   # Mu (vector of constants),
   # Phi (array of autoregressive matrices),
   # Theta (array of MA matrices),
-  # C (matrix of dimension n x n, this is the mixing matrix)
+  # C, or B (matrix of dimension n x n, this is the mixing matrix)
   # distri (which characterizes the distribution of the shocks)
   # Y0   contains the initial values of Y,   it has to be of dimension (p x n) * 1 (concatenation of Y_1,...,Y_p)
   # eta0 contains the initial values of eps, it has to be of dimension (q x n) * 1 (concatenation of eta_1,...,eta_q)
   # Notations:
   # n is the dimension of Y, p is the AR order, q is the MA order.
+  # !!! Important Note !!! -----------------------------------------------------
+  # In Model, if B is specified, and not C, then the VARMA specification is:
+  # y_t = mu + Phi1·y_{t-1} + ... + Phip·y_{t-p} +
+  #       B·eta_t + Theta1·B·eta_{t-1} + ... + Thetaq·B·eta_{t-q}
+  # otherwise, if C is specified, the VARMA specification is:
+  # y_t = mu + Phi1·y_{t-1} + ... + Phip·y_{t-p} +
+  #       C·eta_t - Theta1·C·eta_{t-1} - ... - Thetaq·C·eta_{t-q}
+  # (Notice the change in the signs in the MA part)
+  # ----------------------------------------------------------------------------
   n <- dim(Model$Phi)[1]
   p <- dim(Model$Phi)[3]
-  if(is.matrix(Model$Theta)==1){
-    q <- 1
+
+  if(is.null(Model$B)){
+    indic_B_and_not_C <- FALSE
+    CC <- diag(q + 1) %x% Model$C
   }else{
-    q <- dim(Model$Theta)[3]
+    indic_B_and_not_C <- TRUE
+    CC <- diag(q + 1) %x% Model$B
   }
 
-  MU <- c(Model$Mu,rep(0,n*(p-1)))
+  if(is.null(Model$Theta)){
+    q <- 0
+    THETA <- diag(n)
+  }else{
+    if (is.matrix(Model$Theta) == 1) {
+      q <- 1
+      THETA <- cbind(diag(n),
+                     ((+1)*indic_B_and_not_C + (-1)*!indic_B_and_not_C)*
+                       matrix(Model$Theta, nrow = n))
+    } else {
+      q <- dim(Model$Theta)[3]
+      THETA <- cbind(diag(n),
+                     ((+1)*indic_B_and_not_C + (-1)*!indic_B_and_not_C)*
+                       matrix(Model$Theta, nrow = n))
+    }
+  }
+  THETA <- rbind(THETA, matrix(0, n * (p - 1), n * (q + 1)))
+  MU <- c(Model$Mu, rep(0, n * (p - 1)))
   PHI <- make.PHI(Model$Phi)
-  THETA <- cbind(diag(n),-matrix(Model$Theta,nrow=n))
-  THETA <- rbind(THETA,matrix(0,n*(p-1),n*(q+1)))
-  CC <- diag(q+1) %x% Model$C
-
   y <- Y0
   eta <- eta0
-
-  if(indic.IRF==1){
-    eta.simul <- matrix(0,nb.sim,n)
-    eta <- 0*eta
-    MU <- 0*MU
-  }else{
-    eta.simul <- simul.distri(Model$distri,nb.sim)
+  if (indic.IRF == 1) {
+    eta.simul <- matrix(0, nb.sim, n)
+    eta <- 0 * eta
+    MU <- 0 * MU
+  } else {
+    eta.simul <- simul.distri(Model$distri, nb.sim)
   }
-  eta.simul[1,] <- eta0[1:n]
-
+  eta.simul[1, ] <- eta0[1:n]
   Y <- NULL
   EPS <- NULL
   V <- NULL
   ETA <- NULL
-  for(t in 1:nb.sim){
-    eta <- c(eta.simul[t,],eta[1:(n*q)])
+  for (t in 1:nb.sim) {
+    if(q > 0){
+      eta <- c(eta.simul[t, ], eta[1:(n * q)])
+    }else{
+      eta <- eta.simul[t, ]
+    }
     eps <- CC %*% eta
     v <- THETA %*% eps
     y <- MU + PHI %*% y + v
-    Y <- cbind(Y,y)
-    ETA <- cbind(ETA,eta)
-    EPS <- cbind(EPS,eps)
-    V <- cbind(V,v)
+    Y <- cbind(Y, y)
+    ETA <- cbind(ETA, eta)
+    EPS <- cbind(EPS, eps)
+    V <- cbind(V, v)
   }
-  return(list(Y=Y,EPS=EPS,ETA=ETA,V=V))
+  return(list(Y = Y, EPS = EPS, ETA = ETA, V = V))
 }
 
 make.PHI <- function(Phi){
