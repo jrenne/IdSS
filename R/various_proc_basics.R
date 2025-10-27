@@ -41,7 +41,7 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star,indic.IRF=0,u.shock=0,eta=NaN){
   return(Y[,1:n])
 }
 
-simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
+simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
   # Model is a list containing:
   # Mu (vector of constants),
   # Phi (array of autoregressive matrices),
@@ -99,6 +99,15 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
 
   MU <- c(Model$Mu, rep(0, n * (p - 1)))
   PHI <- make.PHI(Model$Phi)
+
+  if(is.na(Y0[1])){
+    if(indic.IRF==1){
+      Y0 <- rep(0,n*p)
+    }else{
+      Y0 <- solve(diag(n*p) - PHI) %*% MU
+    }
+  }
+
   y <- Y0
   eta <- eta0
   if (indic.IRF == 1) {
