@@ -43,7 +43,7 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
 
 simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
   # Model is a list containing:
-  # Mu (vector of constants),
+  # c (vector of constants),
   # Phi (array of autoregressive matrices),
   # Theta (array of MA matrices),
   # C, or B (matrix of dimension n x n, this is the mixing matrix)
@@ -55,10 +55,10 @@ simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
   # n is the dimension of Y, p is the AR order, q is the MA order.
   # !!! Important Note !!! -----------------------------------------------------
   # In Model, if B is specified, and not C, then the VARMA specification is:
-  # y_t = mu + Phi1·y_{t-1} + ... + Phip·y_{t-p} +
+  # y_t = c + Phi1·y_{t-1} + ... + Phip·y_{t-p} +
   #       B·eta_t + Theta1·B·eta_{t-1} + ... + Thetaq·B·eta_{t-q}
   # otherwise, if C is specified, the VARMA specification is:
-  # y_t = mu + Phi1·y_{t-1} + ... + Phip·y_{t-p} +
+  # y_t = c + Phi1·y_{t-1} + ... + Phip·y_{t-p} +
   #       C·eta_t - Theta1·C·eta_{t-1} - ... - Thetaq·C·eta_{t-q}
   # (Notice the change in the signs in the MA part)
   # ----------------------------------------------------------------------------
@@ -97,7 +97,7 @@ simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
     Model$distri <- list(type=rep("gaussian",n))
   }
 
-  MU <- c(Model$Mu, rep(0, n * (p - 1)))
+  MU <- c(Model$c, rep(0, n * (p - 1)))
   PHI <- make.PHI(Model$Phi)
 
   if(is.na(Y0[1])){
