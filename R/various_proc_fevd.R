@@ -39,8 +39,8 @@ variance.decomp <- function(IRFs){
 
   if(N==1){
     variance  <- array(variance,c(n,n,H,n))
-    Variance  <- array(variance,c(n,n,H))
-    vardecomp <- array(variance,c(n,n,H,n))
+    Variance  <- array(Variance,c(n,n,H))
+    vardecomp <- array(vardecomp,c(n,n,H,n))
   }
 
   return(
