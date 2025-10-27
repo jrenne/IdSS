@@ -2,9 +2,20 @@ variance.decomp <- function(IRFs){
   # This functions computes the variance decomposition associated to a set
   # of IRFs organised as variables x shocks x horizons x IRF draws (we must
   # have that the number of variables is equal to the number of shocks)
+  # Hence, IRFs has 4 dimensions. If there is only one draw (e.g. estimated model),
+  #   then IRFs has only 3 dimensions.
+
   n <- dim(IRFs)[1]
   H <- dim(IRFs)[3]
+
+  if(length(dim(IRFs))<4){
+    # In that case, add the fourth dimension (remains 1)
+    N <- 1
+    IRFs <- array(IRFs,c(n,n,H,N))
+  }
+
   N <- dim(IRFs)[4]
+
   Variance <- array(0,c(n,n,H,N))
   variance <- array(0,c(n,n,H,N,n))
   Select <- array(0,c(n,n,n))
@@ -25,6 +36,13 @@ variance.decomp <- function(IRFs){
   }
   Variance_rep  <- replicate(n,Variance, simplify="array")
   vardecomp = variance / Variance_rep
+
+  if(N==1){
+    variance  <- array(variance,c(n,n,H,n))
+    Variance  <- array(variance,c(n,n,H))
+    vardecomp <- array(variance,c(n,n,H,n))
+  }
+
   return(
     list(
       variance = variance,
