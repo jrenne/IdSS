@@ -47,7 +47,8 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
   # Phi (array of autoregressive matrices),
   # Theta (array of MA matrices),
   # C, or B (matrix of dimension n x n, this is the mixing matrix)
-  # distri (which characterizes the distribution of the shocks)
+  # distri (which characterizes the distribution of the shocks),
+  #    By default, "distri" is set to standard normal distributions.
   # Y0   contains the initial values of Y,   it has to be of dimension (p x n) * 1 (concatenation of Y_1,...,Y_p)
   # eta0 contains the initial values of eps, it has to be of dimension (q x n) * 1 (concatenation of eta_1,...,eta_q)
   # Notations:
@@ -89,6 +90,11 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
     CC <- diag(q + 1) %x% Model$B
   }else{
     CC <- diag(q + 1) %x% Model$C
+  }
+
+  # Set type of distributions if missing:
+  if(is.null(Model$distri)){
+    Model$distri <- list(type=rep("gaussian",n))
   }
 
   MU <- c(Model$Mu, rep(0, n * (p - 1)))
