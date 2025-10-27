@@ -64,14 +64,6 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
   n <- dim(Model$Phi)[1]
   p <- dim(Model$Phi)[3]
 
-  if(is.null(Model$B)){
-    indic_B_and_not_C <- FALSE
-    CC <- diag(q + 1) %x% Model$C
-  }else{
-    indic_B_and_not_C <- TRUE
-    CC <- diag(q + 1) %x% Model$B
-  }
-
   if(is.null(Model$Theta)){
     q <- 0
     THETA <- diag(n)
@@ -89,6 +81,15 @@ simul.VARMA <- function(Model,nb.sim,Y0,eta0,indic.IRF=0){
     }
   }
   THETA <- rbind(THETA, matrix(0, n * (p - 1), n * (q + 1)))
+
+  if(is.null(Model$B)){
+    indic_B_and_not_C <- FALSE
+    CC <- diag(q + 1) %x% Model$C
+  }else{
+    indic_B_and_not_C <- TRUE
+    CC <- diag(q + 1) %x% Model$B
+  }
+
   MU <- c(Model$Mu, rep(0, n * (p - 1)))
   PHI <- make.PHI(Model$Phi)
   y <- Y0
