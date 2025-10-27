@@ -1,5 +1,5 @@
 
-simul.VAR <- function(c,Phi,B,nb.sim,y0.star,indic.IRF=0,u.shock=0,eta=NaN){
+simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
   # This function simulates a VAR model, initial condition = y0.star
   # Phi is a list, each element of which is a Phi_i matrix. Hence it has p elements if we consider a VAR(p)
   # If eta is different from NaN then the structural shocks are those defined in this
