@@ -6,6 +6,16 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
   #      matrix of dimension (nb.sim x n)
   p <- length(Phi)
   n <- dim(Phi[[1]])[1]
+
+  # If Phi is an array, convert it into a list:
+  if(class(Phi)[1]!="list"){
+    if(class(Phi)[1]=="matrix"){
+      Phi <- list(Phi)
+    }else{# In thisd case, Phi is an array
+      Phi <- lapply(seq_len(dim(Phi)[3]), function(k) Phi[ , , k])
+    }
+  }
+
   # Check that right dimension for y0.star:
   if((indic.IRF==0)&(length(y0.star)!=(n*p))){
     print("The dimension of y0.star should be (np x 1) where p is the number of lags in the VAR and n is the dimension of y")
