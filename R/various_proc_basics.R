@@ -244,11 +244,20 @@ make_variance_decompo <- function(Phi,B,maxHorizon,
     res_variable <- apply(res_variable,1,cumsum)
     res_variable <- rbind(0,res_variable)
     plot(1:maxHorizon,rep(0,maxHorizon),ylim=c(0,1),col="white",las=1,
-         xlab="Horizon",ylab="Variance share",main=names.var[variable])
+         xlab="",ylab="Variance share",main=names.var[variable])
     for(k in 1:n){
       polygon(c(1:maxHorizon,maxHorizon:1),
               c(res_variable[k,],rev(res_variable[k+1,])),col=k+1)
     }
+
+    # Add custom 'Horizon' label inside the plot
+    usr <- par("usr")  # [x1, x2, y1, y2]
+    text(x = usr[2],  # right edge of x-axis
+         y = usr[3] + 0.05 * (usr[4] - usr[3]),  # slightly above the axis
+         labels = "Horizon",
+         adj = c(1, 0),   # right-aligned, baseline position
+         xpd = TRUE,      # allow writing in the margin
+         font = 1)        # optional: bold
 
     # Draw legend below the plot
     legend("bottom",
