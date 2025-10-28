@@ -252,7 +252,7 @@ make_variance_decompo <- function(Phi,B,maxHorizon,
 
     # Add custom 'Horizon' label inside the plot
     usr <- par("usr")  # [x1, x2, y1, y2]
-    text(x = usr[2],  # right edge of x-axis
+    text(x = usr[2] - 0.2 * (usr[2] - usr[1]),  # right edge of x-axis
          y = usr[3] + 0.05 * (usr[4] - usr[3]),  # slightly above the axis
          labels = "Horizon",
          adj = c(1, 0),   # right-aligned, baseline position
