@@ -201,3 +201,54 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
   return(eps)
 }
 
+
+make_variance_decompo <- function(Phi,B,maxHorizon,mfrow=NaN){
+  # This function produces a plot showing the variance decomposition
+  # associated with a VAR model defined by autoregressive matrices Phi,
+  # and an impact matrix B.
+
+  n <- dim(B)[1] # dimension of the state vector
+
+  IRFs <- array(NaN,c(n,n,maxHorizon))
+  for(i in 1:n){
+    u.shock <- rep(0,n)
+    u.shock[i] <- 1
+    Y <- simul.VAR(c=matrix(0,n,1),Phi=Phi,B = B,nb.sim=maxHorizon,
+                   indic.IRF = 1,u.shock = u.shock)
+    IRFs[,i,] <- t(Y)
+  }
+  res <- variance.decomp(IRFs)$vardecomp
+
+  if(is.na(mfrow[1])){
+    par(mfrow=c(1,n)) # define plot margins
+  }else{
+    par(mfrow=mfrow) # define plot margins
+  }
+  par(mar = c(6, 4, 4, 2) + 0.1) # define plot margins
+
+  for(variable in 1:n){
+    res_variable <-
+      res[variable,variable,,] # 1 because 1 model studied (no bootstrap)
+    res_variable <- apply(res_variable,1,cumsum)
+    res_variable <- rbind(0,res_variable)
+    plot(1:maxHorizon,rep(0,maxHorizon),ylim=c(0,1),col="white",las=1,
+         xlab="Horizon",ylab="Variance share",main=names.var[variable])
+    for(k in 1:n){
+      polygon(c(1:maxHorizon,maxHorizon:1),
+              c(res_variable[k,],rev(res_variable[k+1,])),col=k+1)
+    }
+
+    # Draw legend below the plot
+    legend("bottom",
+           inset = -0.3,              # how far below (negative pushes it out)
+           horiz = TRUE,              # horizontal layout
+           bty = "n",                 # no box
+           pch = 15,                  # filled square symbols
+           col = 2:(n+1),                 # colors
+           legend = paste("Shock ", 1:n),
+           xpd = TRUE,                # allow drawing outside plot area
+           pt.cex = 1.5, cex = 0.9)
+  }
+  return(0)
+}
+
