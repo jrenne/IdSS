@@ -202,76 +202,68 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
 }
 
 
-make_variance_decompo <- function(Phi,B,maxHorizon,
-                                  mfrow=NaN,
-                                  names.var=NaN,
-                                  names.shock=NaN){
+make_variance_decompo <- function(Phi, B, maxHorizon,
+                                  mfrow = NA,
+                                  names.var = NA,
+                                  names.shock = NA) {
   # This function produces a plot showing the variance decomposition
-  # associated with a VAR model defined by autoregressive matrices Phi,
+  # associated with a VAR model defined by autoregressive matrices Phi
   # and an impact matrix B.
-  # 'mfrow' defines the plot layout.
-  # 'names.var' allows to provide variable names (1,...,n by default).
-  # 'names.shock' allows to provide shock names (1,...,n by default).
 
-  n <- dim(B)[1] # dimension of the state vector
-  if(is.na(names.var[1])){
-    names.var <- paste("Variable ", 1:n)
-  }
-  if(is.na(names.shock[1])){
-    names.shock <- paste("Shock ", 1:n)
-  }
+  n <- dim(B)[1]
+  if (is.na(names.var[1])) names.var <- paste("Variable", 1:n)
+  if (is.na(names.shock[1])) names.shock <- paste("Shock", 1:n)
 
-  IRFs <- array(NaN,c(n,n,maxHorizon))
-  for(i in 1:n){
-    u.shock <- rep(0,n)
+  IRFs <- array(NA, c(n, n, maxHorizon))
+  for (i in 1:n) {
+    u.shock <- rep(0, n)
     u.shock[i] <- 1
-    Y <- simul.VAR(c=matrix(0,n,1),Phi=Phi,B = B,nb.sim=maxHorizon,
-                   indic.IRF = 1,u.shock = u.shock)
-    IRFs[,i,] <- t(Y)
+    Y <- simul.VAR(c = matrix(0, n, 1), Phi = Phi, B = B,
+                   nb.sim = maxHorizon, indic.IRF = 1, u.shock = u.shock)
+    IRFs[, i, ] <- t(Y)
   }
   res <- variance.decomp(IRFs)$vardecomp
 
-  if(is.na(mfrow[1])){
-    par(mfrow=c(1,n)) # define plot margins
-  }else{
-    par(mfrow=mfrow) # define plot margins
+  # Handle layout flexibly
+  if (is.na(mfrow[1])) {
+    mfrow <- c(1, n)
   }
+  par(mfrow = mfrow)
 
-  par(mar = c(8, 4, 4, 2) + 0.1) # define plot margins
+  # Adjust margins dynamically depending on layout
+  nrows <- mfrow[1]
+  ncols <- mfrow[2]
 
-  for(variable in 1:n){
-    res_variable <-
-      res[variable,variable,,]
-    res_variable <- apply(res_variable,1,cumsum)
-    res_variable <- rbind(0,res_variable)
-    plot(1:maxHorizon,rep(0,maxHorizon),ylim=c(0,1),col="white",las=1,
-         xlab="",ylab="Variance share",main=names.var[variable])
-    for(k in 1:n){
-      polygon(c(1:maxHorizon,maxHorizon:1),
-              c(res_variable[k,],rev(res_variable[k+1,])),col=k+1)
+  par(plt=c(.15,.95,.2,.8))
+
+  for (variable in 1:n) {
+    res_variable <- res[variable, variable,,]
+    res_variable <- apply(res_variable, 1, cumsum)
+    res_variable <- rbind(0, res_variable)
+
+    plot(1:maxHorizon, rep(0, maxHorizon),
+         ylim = c(0, 1), col = "white", las = 1,
+         xlab = "", ylab = "Variance share",
+         main = names.var[variable])
+
+    for (k in 1:n) {
+      polygon(c(1:maxHorizon, maxHorizon:1),
+              c(res_variable[k,], rev(res_variable[k + 1,])),
+              col = k + 1, border = NA)
     }
 
-    # Add custom 'Horizon' label inside the plot
-    usr <- par("usr")  # [x1, x2, y1, y2]
-    text(x = usr[2] - 0.2 * (usr[2] - usr[1]),  # right edge of x-axis
-         y = usr[3] + 0.05 * (usr[4] - usr[3]),  # slightly above the axis
+    # Add custom "Horizon" label inside the plot
+    usr <- par("usr")
+    text(x = usr[2] - 0.3 * (usr[2] - usr[1]),
+         y = usr[3] + 0.07 * (usr[4] - usr[3]),
          labels = "Horizon",
-         adj = c(1, 0),   # right-aligned, baseline position
-         xpd = TRUE,      # allow writing in the margin
-         font = 1)        # optional: bold
+         adj = c(1, 0), xpd = TRUE)
 
-    # Draw legend below the plot
-    legend("bottom",
-           inset = -0.3,              # how far below (negative pushes it out)
-           horiz = TRUE,              # horizontal layout
-           bty = "n",                 # no box
-           pch = 15,                  # filled square symbols
-           col = 2:(n+1),                 # colors
-           legend = names.shock,
-           xpd = TRUE,                # allow drawing outside plot area
-           pt.cex = 1.5, cex = 0.9)
+    # Legend adjustment: fit better inside multi-plot layouts
+    legend("topleft", horiz = FALSE, bty = "n",
+           pch = 15, col = 2:(n + 1), legend = names.shock,
+           xpd = TRUE, pt.cex = 1.2, cex = 1)
   }
 
-  # --- Prevent printing of a value in knitr/R Markdown ---
   invisible(NULL)
 }
