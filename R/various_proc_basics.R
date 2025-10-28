@@ -261,7 +261,8 @@ make_variance_decompo <- function(Phi, B, maxHorizon,
 
     # Legend adjustment: fit better inside multi-plot layouts
     legend("topleft", horiz = FALSE, bty = "n",
-           pch = 15, col = 2:(n + 1), legend = names.shock,
+           pch = 22,pt.bg = 2:(n + 1),
+           col = "black", legend = names.shock,
            xpd = TRUE, pt.cex = 1.2, cex = 1)
   }
 
