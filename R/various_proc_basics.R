@@ -270,6 +270,7 @@ make_variance_decompo <- function(Phi,B,maxHorizon,
            xpd = TRUE,                # allow drawing outside plot area
            pt.cex = 1.5, cex = 0.9)
   }
-  return(0)
-}
 
+  # --- Prevent printing of a value in knitr/R Markdown ---
+  invisible(NULL)
+}
