@@ -236,7 +236,8 @@ make_variance_decompo <- function(Phi,B,maxHorizon,
   }else{
     par(mfrow=mfrow) # define plot margins
   }
-  par(mar = c(6, 4, 4, 2) + 0.1) # define plot margins
+
+  par(mar = c(8, 4, 4, 2) + 0.1) # define plot margins
 
   for(variable in 1:n){
     res_variable <-
