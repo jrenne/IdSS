@@ -202,12 +202,24 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
 }
 
 
-make_variance_decompo <- function(Phi,B,maxHorizon,mfrow=NaN){
+make_variance_decompo <- function(Phi,B,maxHorizon,
+                                  mfrow=NaN,
+                                  names.var=NaN,
+                                  names.shock=NaN){
   # This function produces a plot showing the variance decomposition
   # associated with a VAR model defined by autoregressive matrices Phi,
   # and an impact matrix B.
+  # 'mfrow' defines the plot layout.
+  # 'names.var' allows to provide variable names (1,...,n by default).
+  # 'names.shock' allows to provide shock names (1,...,n by default).
 
   n <- dim(B)[1] # dimension of the state vector
+  if(is.na(names.var[1])){
+    names.var <- paste("Variable ", 1:n)
+  }
+  if(is.na(names.shock[1])){
+    names.shock <- paste("Shock ", 1:n)
+  }
 
   IRFs <- array(NaN,c(n,n,maxHorizon))
   for(i in 1:n){
@@ -228,7 +240,7 @@ make_variance_decompo <- function(Phi,B,maxHorizon,mfrow=NaN){
 
   for(variable in 1:n){
     res_variable <-
-      res[variable,variable,,] # 1 because 1 model studied (no bootstrap)
+      res[variable,variable,,]
     res_variable <- apply(res_variable,1,cumsum)
     res_variable <- rbind(0,res_variable)
     plot(1:maxHorizon,rep(0,maxHorizon),ylim=c(0,1),col="white",las=1,
@@ -245,7 +257,7 @@ make_variance_decompo <- function(Phi,B,maxHorizon,mfrow=NaN){
            bty = "n",                 # no box
            pch = 15,                  # filled square symbols
            col = 2:(n+1),                 # colors
-           legend = paste("Shock ", 1:n),
+           legend = names.shock,
            xpd = TRUE,                # allow drawing outside plot area
            pt.cex = 1.5, cex = 0.9)
   }
