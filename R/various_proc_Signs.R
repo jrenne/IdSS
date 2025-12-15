@@ -141,6 +141,7 @@
 #'             sign.restrictions = sign.restrictions,
 #'             horizon = horizon,
 #'             recursive =1)
+#' @export
 svar.signs <- function(Y,p,
                        nb.shocks,
                        nb.periods.IRF = 20,
