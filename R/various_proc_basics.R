@@ -387,8 +387,6 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
 #'   Defaults to \code{"Shock 1"}, \code{"Shock 2"}, … .
 #'
 #' @returns the function output is a set of plots.
-#' @export
-#'
 #' @examples
 #' Phi <- array(NaN,c(2,2,2)) # (2,2,2) for (n,n,p)
 #' Phi[,,1] <- matrix(c(.6,0,.2,.5),2,2)
