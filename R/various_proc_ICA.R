@@ -420,7 +420,7 @@ make.A.matrix <- function(eps,distri,C){
   return(A)
 }
 
-
+#' @export
 make.Asympt.Cov.delta <- function(eps,distri,C){
   n <- dim(eps)[2]
   T <- dim(eps)[1]
