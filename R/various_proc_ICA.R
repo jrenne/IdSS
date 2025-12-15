@@ -306,6 +306,7 @@ gICA <- function(eps,distri,indic.deriv=0){
   return(list(log.L=log.L,d.log.L=d.log.L,d2.log.L=d2.log.L))
 }
 
+#' @export
 func.2.minimize <- function(theta,Y,distri){
   aux <- pseudo.log.L(Y,theta,distri)
   return(- aux$log.L)
