@@ -53,7 +53,7 @@
 #' res.svar.ordering <-
 #'  svar.ordering.2(y,p=3, posit.of.shock = 5,
 #'                  nb.periods.IRF = 20,
-#'                  inference = 3
+#'                  inference = 3,
 #'                  nb.draws = 200,
 #'                  confidence.interval = 0.90,
 #'                  indic.plot = 1)
