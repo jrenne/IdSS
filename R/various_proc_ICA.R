@@ -1,5 +1,6 @@
 
 
+#' @export
 estim.SVAR.ICA <- function(endog.var,distri,p){
 
   n <- dim(endog.var)[2]

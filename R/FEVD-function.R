@@ -38,6 +38,7 @@
 #'   bootstrap standard deviations.}
 #' \item{CI.lower.bounds}{Array of lower quantiles.}
 #' \item{CI.upper.bounds}{Array nb.periods.IRF of upper quantiles}
+#' @export
 svar.fevmax <- function(Y,p,
                         nb.shocks,
                         names.of.shocks,

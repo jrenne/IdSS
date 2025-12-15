@@ -75,6 +75,7 @@ NW.LongRunVariance <- function(X,q){
   return(LRV)
 }
 
+#' @export
 tsls <- function(Y,X,Z,q){
   # Regress y on x, using z as an instrument.
   # Y, X and Z have to be matrices
@@ -183,6 +184,7 @@ tsls <- function(Y,X,Z,q){
 #'        nb.bootstrap.replications = 100,
 #'        confidence.interval = 0.90,
 #'        indic.plot=1)
+#' @export
 svar.iv <- function(Y,Z,p,
                     names.of.variables,
                     nb.periods.IRF = 20,
@@ -422,6 +424,7 @@ svar.iv.aux <- function(Y,Z,p,
 #'                                    confidence.interval = 0.90, # expressed in pp.
 #'                                    indic.plot = 1 # Plots are displayed if = 1.
 #' )
+#' @export
 svar.ordering <- function(Y,p,
                           posit.of.shock = 1,
                           nb.periods.IRF = 20,
@@ -614,6 +617,7 @@ svar.ordering.aux <- function(Y,p,
 #'                             nb.periods.IRF = 12, nb.lags.endog.var.4.control=3,
 #'                           indic.plot = 1, # Plots are displayed if = 1.
 #'                           confidence.interval = 0.90)
+#' @export
 make.jorda.irf <- function(Y,
                            posit.of.shock = 1,
                            nb.periods.IRF = 20,
@@ -683,6 +687,7 @@ make.jorda.irf <- function(Y,
 }
 
 
+#' @export
 make.LPIV.irf <- function(Y,Z,
                           posit.of.shock = 1,
                           nb.periods.IRF = 20,

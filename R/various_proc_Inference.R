@@ -57,6 +57,7 @@
 #'                  nb.draws = 200,
 #'                  confidence.interval = 0.90,
 #'                  indic.plot = 1)
+#' @export
 svar.ordering.2 <- function(Y,p,
                           posit.of.shock = 1,
                           nb.periods.IRF = 20,

@@ -52,6 +52,7 @@
 #' irf <- simul.VAR(c0, Phi, B, nb.sim = 12, y0.star = y0,
 #'                  indic.IRF = 1, u.shock = c(1, 0))
 #'
+#' @export
 simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
   # This function simulates a VAR model, initial condition = y0.star
   # Phi is a list, each element of which is a Phi_i matrix. Hence it has p elements if we consider a VAR(p)
@@ -176,6 +177,7 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
 #'
 #' sim <- simul.VARMA(Model, nb.sim = 50, Y0 = Y0, eta0 = eta0)
 #' irf <- simul.VARMA(Model, nb.sim = 50, Y0 = Y0, eta0 = eta0, indic.IRF = 1)
+#' @export
 simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
   # Model is a list containing:
   # c (vector of constants),
@@ -305,6 +307,7 @@ simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
 #'  PHI <- make.PHI(Phi) # autoregressive matrix of companion form.
 #'  print(abs(eigen(PHI)$values)) # check stationarity
 #'
+#' @export
 make.PHI <- function(Phi){
   if(class(Phi)=="list"){
     p <- length(Phi)
@@ -327,6 +330,8 @@ make.PHI <- function(Phi){
   return(PHI)
 }
 
+
+#' @export
 simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
   # Simulation of independent shocks
   eps <- NULL
@@ -412,6 +417,7 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
 # make_variance_decompo(Phi, B, maxHorizon = 50,
 # names.var = c("Inflation", "Real activity",
 # "Short-term rate"))
+#' @export
 make.variance.decompo <- function(Phi, B, maxHorizon,
                                   mfrow = NA,
                                   names.var = NA,
