@@ -4,6 +4,7 @@
 # Jean-Paul Renne, 2018
 # =============================================================
 
+# this function is used in NW.LongRunVariance()
 autocov <- function(X,n){
   if(class(X)[1]!="matrix"){
     T <- length(X)
@@ -23,21 +24,50 @@ autocov <- function(X,n){
   }
 }
 
-NW.Weights <- function(q){
-  if(q==0){
-    weights <- 0
-  }else{
-    weights <- 1 - (1:q)/(q+1)
-  }
-  return(weights)
-}
+# Function used only in NW.LongRunVariance(), so we included directly into it.
+# NW.Weights <- function(q){
+#   if(q==0){
+#     weights <- 0
+#   }else{
+#     weights <- 1 - (1:q)/(q+1)
+#   }
+#   return(weights)
+# }
 
 
+#' Newey–West Long-Run Variance Estimator
+#'
+#'Computes the Newey–West estimator of the long-run variance
+#'(or long-run covariance matrix) of a univariate or
+#'multivariate time series.
+#'
+#' @param X A vector or a matrix representing the time series.
+#' If \code{X} is a matrix of size \eqn{T \times k}, the function returns a
+#' \eqn{k \times k} long-run covariance matrix.
+#'
+#' @param q A non-negative integer specifying the Newey–West truncation lag.
+#' If \code{q = 0}, the function returns the contemporaneous covariance
+#' \code{autocov(X, 0)}.
+#'
+#' @return A scalar (if \code{X} is univariate) or a matrix (if \code{X} is
+#' multivariate) giving the Newey–West long-run variance or covariance estimate.
+#'
+#' @examples
+#' # Univariate example
+#' set.seed(123)
+#' x <- rnorm(200)
+#' NW.LongRunVariance(x, q = 4)
+#'
+#' # Multivariate example
+#' X <- cbind(rnorm(200), rnorm(200))
+#' NW.LongRunVariance(X, q = 5)
+#'
+#' @export
 NW.LongRunVariance <- function(X,q){
   gamma0 <- autocov(X,0)
   LRV <- gamma0
   if(q>0){
-    weights <- NW.Weights(q)
+    weights <-  1 - (1:q)/(q+1)
     for(i in 1:q){
       LRV <- LRV + weights[i] * (autocov(X,i) + t(autocov(X,i)))
     }
@@ -93,6 +123,66 @@ tsls <- function(Y,X,Z,q){
   )
 }
 
+
+#' Implementation of the IV-SVAR approach
+#'
+#'This function implements the IV-SVAR approach.
+#'  We are interested in the IRF of Y following a structural shock (\eqn{\eta_1}),
+#'  Z being an instrument for \eqn{eta_1}
+#'  Y is modelled as a VAR(p) model.
+#'  The IRF are scaled in such a way that the contemporaneous impact of eta_1 on Y_1 is 1.
+#' @param Y A \code{T x n} numeric matrix
+#'   of endogenous variables, with rows as time and columns as series.
+#' @param Z A T × k (k ≥ 1) numeric matrix with external instrument(s) for the
+#'   targeted structural shock (default: the first shock). If k > 1, columns are used
+#'   jointly as instruments. Must be time-aligned with Y.
+#' @param p Integer, the VAR lag order for \code{Y}.
+#' @param names.of.variables Character vector of length \eqn{n} with the name of the endogenous variables.
+#' @param nb.periods.IRF An integer specifying the number of periods for which
+#'   impulse response functions are computed. Default is 20.
+#' @param z.AR.order Integer \eqn{\ge 0}. AR order for \code{Z}. Used in the parametric bootstrap only.
+#'  Default is \code{3}.
+#' @param nb.bootstrap.replications An integer giving the number of bootstrap
+#'   replications used to compute confidence intervals. Applies only when a
+#'   parametric bootstrap is used. Default is 0 (no bootstrap).
+#' @param confidence.interval  numeric value between 0 and 1 indicating the
+#'   confidence level for bootstrap intervals (e.g. 0.90 for 90% intervals).
+#'   Default is 0.90.
+#' @param indic.plot Plots are displayed if = 1.
+#'
+#' @return
+#' \item{IRFs}{A matrix of IRFs (horizons in rows).}
+#' \item{all.simulated.IRFs.res}{Array  of
+#'   bootstrap IRFs; \code{NULL} if no bootstrap.}
+#' \item{all.stdv.IRFs}{Matrix of bootstrap standard
+#'   deviations; \code{NULL} if no bootstrap.}
+#' \item{Sigma.IV}{Empirical covariance matrix of the stacked innovation vector
+#'   \eqn{(\hat{\varepsilon}_Y^\top,\; \hat{u}_Z)^\top} used in the bootstrap;
+#'   \code{NULL} if no bootstrap.}
+#' \item{cor.Sigma.IV}{Correlation matrix corresponding to \code{Sigma.IV};
+#'   \code{NULL} if no bootstrap.}
+#' \item{all.CI.lower.bounds, all.CI.upper.bounds}{
+#'   Matrices of bootstrap percentile bands; \code{NULL} if no bootstrap.}
+#' \item{all.B.tilde.1}{Matrix collecting the normalized impact vectors from
+#'   each bootstrap draw (one column per replication); \code{NULL} if no
+#'   bootstrap.}
+#'
+#'
+#' @examples
+#' data("USmonthly_1990_to_2012")
+#'
+#' indic.shock.name <- which(names(USmonthly_1990_to_2012)%in%c("FF4_TC","ED2_TC"))
+#' Z <- as.matrix(USmonthly_1990_to_2012[,indic.shock.name])
+#' considered.variables <- c("GS1","LIP","LCPI","EBP")
+#' Y <- as.matrix(USmonthly_1990_to_2012[,considered.variables])
+#' n <- length(considered.variables)
+#'
+#' svar.iv(Y,Z,p = 4,names.of.variables=considered.variables,
+#'        nb.periods.IRF = 20,
+#'        z.AR.order=1,
+#'        nb.bootstrap.replications = 100,
+#'        confidence.interval = 0.90,
+#'        indic.plot=1)
 svar.iv <- function(Y,Z,p,
                     names.of.variables,
                     nb.periods.IRF = 20,
@@ -287,6 +377,51 @@ svar.iv.aux <- function(Y,Z,p,
 }
 
 
+#' Estimation of IRF
+#'
+#'This functions computes impulse response functions.
+#'The estimation of structural shocks is done by Cholesky decomposition.
+#'Confidence intervals are obtained by boostrapping the estimated VAR model.
+#'
+#' @param Y Numeric matrix of size \eqn{T \times n} containing the endogenous
+#'   variables (one column per variable). Column names are used for plot titles.
+#' @param p Integer for the lag order.
+#' @param posit.of.shock An integer giving the position (column index in \code{Y})
+#' of the structural shock of interest. Default is 1.
+#' @param nb.periods.IRF An integer specifying the number of periods for which
+#'   impulse response functions are computed. Default is 20.
+#' @param nb.bootstrap.replications An integer giving the number of bootstrap
+#'   replications used to compute confidence intervals. Applies only when a
+#'   parametric bootstrap is used. Default is 0 (no bootstrap).
+#' @param confidence.interval A numeric value between 0 and 1 indicating the
+#'   confidence level for bootstrap intervals (e.g. 0.90 for 90% intervals).
+#'   Default is 0.90.
+#' @param indic.plot Plots are displayed if = 1.
+#' @return A list with the following components:
+#' \describe{
+#'   \item{IRFs}{Matrix of estimated impulse response functions.}
+#'   \item{all.simulated.IRFs.res}{Array of simulated IRFs across bootstrap replications.}
+#'   \item{all.stdv.IRFs}{Matrix of standard deviations of the simulated IRFs.}
+#'   \item{all.CI.lower.bounds}{Matrix of lower bounds of bootstrap confidence intervals.}
+#'   \item{all.CI.upper.bounds}{Matrix of upper bounds of bootstrap confidence intervals.}
+#' }
+#'
+#' @export
+#' @references
+#' Christiano, L. J., Eichenbaum, M., and Evans, C. (1996).
+#' The effects of monetary policy shocks: Evidence from the flow of funds.
+#' The Review of Economics and Statistics, 78(1):16– 34.
+#' @examples
+#' data("USmonthlyExample")
+#' considered.variables <- c("LIP","UNEMP","LCPI","LPCOM","FFR","NBR","TTR","M1")
+#' y <- as.matrix(USmonthlyExample[considered.variables])
+#' res.svar.ordering <- svar.ordering(y,p=3,
+#'                                    posit.of.shock = 5,
+#'                                    nb.periods.IRF = 20,
+#'                                    nb.bootstrap.replications = 100,
+#'                                    confidence.interval = 0.90, # expressed in pp.
+#'                                    indic.plot = 1 # Plots are displayed if = 1.
+#' )
 svar.ordering <- function(Y,p,
                           posit.of.shock = 1,
                           nb.periods.IRF = 20,
@@ -435,6 +570,50 @@ svar.ordering.aux <- function(Y,p,
 }
 
 
+#' Local-Projection IRFs à la Jordà (2005)
+#'
+#' Computes impulse response functions (IRFs) using Jordà’s local-projection
+#' method. For each horizon \eqn{h = 0, \dots, H}, the routine runs a separate
+#' regression of \eqn{y_{i,t+h}} on the contemporaneous shock series (chosen by
+#' \code{posit.of.shock}) and optional lags of the endogenous variables, then
+#' stacks the coefficients across horizons. Pointwise standard errors are
+#' computed via a Newey–West estimator and responses are normalized by the
+#' innovation variance of the shock series.
+#'
+#'@param Y Numeric matrix of size \eqn{T \times n} containing the endogenous
+#'   variables (one column per variable). Column names are used for plot titles.
+#' @param posit.of.shock An integer giving the position (column index in \code{Y})
+#' of the structural shock of interest. Default is 1.
+#' @param nb.periods.IRF An integer specifying the number of periods for which
+#'   impulse response functions are computed. Default is 20.
+#' @param nb.lags.endog.var.4.control Integer; number of lags of all endogenous
+#'   variables to include as controls in each local projection (default 0).
+#' @param confidence.interval A numeric value between 0 and 1 indicating the
+#'   confidence level for bootstrap intervals (e.g. 0.90 for 90% intervals).
+#'   Default is 0.90.
+#' @param indic.plot Plots are displayed if = 1.
+#'
+#' @return A list with:
+#' \item{IRFs}{Numeric matrix \eqn{(H+1) \times n} of IRFs normalized by the
+#'   shock’s innovation standard deviation. Row \code{h+1} is horizon \code{h}.}
+#' \item{all.stdv.IRFs}{Numeric matrix \eqn{(H+1) \times n} of pointwise
+#'   (Newey–West) standard errors corresponding to \code{IRFs}.}
+#' @export
+#'
+#' @references
+#' Jordà, Ò. (2005). Estimation and Inference of Impulse Responses by Local
+#' Projections. \emph{American Economic Review}, 95(1), 161–182.
+#' https://doi.org/10.1257/0002828053828474
+#'
+#'
+#' @examples
+#' data("USmonthlyExample")
+#' considered.variables <- c("LIP","UNEMP","LCPI","LPCOM","FFR","NBR","TTR","M1")
+#' y <- as.matrix(USmonthlyExample[considered.variables])
+#' res.jorda <- make.jorda.irf(y,posit.of.shock = 5,
+#'                             nb.periods.IRF = 12, nb.lags.endog.var.4.control=3,
+#'                           indic.plot = 1, # Plots are displayed if = 1.
+#'                           confidence.interval = 0.90)
 make.jorda.irf <- function(Y,
                            posit.of.shock = 1,
                            nb.periods.IRF = 20,

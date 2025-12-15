@@ -9,6 +9,54 @@
 # SVAR identified with Cholesky decomposition (extends svar.ordering)
 # with various inference methods
 
+
+
+#' Identification of SVAR - Estimation of IRF
+#'
+#' This functions identifies a SVAR model and computes IRF. The estimation of structural shocks is done by Cholesky decomposition. Confidence intervals are obtained by boostrapping the estimated VAR model.
+#'Optionally, the function performs inference on the IRFs using parametric bootstrap, non-parametric
+#' bootstrap, Monte Carlo, or bootstrap-after-bootstrap procedures, and plots
+#' confidence intervals if requested.
+#' @param Y 	Numeric matrix of size \code{T×n} containing the endogenous variables (one column per variable).
+#' @param p Integer for the lag order.
+#' @param posit.of.shock An integer giving the position (column index in \code{Y})
+#' of the structural shock of interest. Default is 1.
+#' @param nb.periods.IRF An integer specifying the number of periods for which
+#'   impulse response functions are computed. Default is 20.
+#' @param inference Integer. Method used for inference:
+#'   \itemize{
+#'     \item 0 = no inference (default)
+#'     \item 1 = parametric bootstrap
+#'     \item 2 = non-parametric bootstrap
+#'     \item 3 = Monte Carlo
+#'     \item 4 = bootstrap-after-bootstrap
+#'   }
+#' @param confidence.interval A numeric value between 0 and 1 indicating the
+#'   confidence level for bootstrap intervals (e.g. 0.90 for 90% intervals).
+#'   Default is 0.90.
+#' @param indic.plot Plots are displayed if = 1.
+#' @return A list with the following elements:
+#' \describe{
+#'   \item{\code{IRFs}}{Matrix of estimated impulse response functions.}
+#'   \item{\code{simulated.IRFs}}{Array of simulated IRFs across bootstrap or
+#'     Monte Carlo replications (if \code{inference > 0}).}
+#'   \item{\code{all.stdv.IRFs}}{Matrix of standard deviations of the simulated IRFs
+#'     (if \code{inference > 0}).}
+#'   \item{\code{all.CI.lower.bounds}}{Matrix of lower bounds of the confidence intervals.}
+#'   \item{\code{all.CI.upper.bounds}}{Matrix of upper bounds of the confidence intervals.}
+#'   \item{\code{all.CI.median}}{Matrix of medians of the simulated IRFs.}
+#' }
+#' @examples
+#' data("USmonthlyExample")
+#' y <- as.matrix(USmonthlyExample[considered.variables])
+#' ## Monte-Carlo
+#' res.svar.ordering <-
+#'  svar.ordering.2(y,p=3, posit.of.shock = 5,
+#'                  nb.periods.IRF = 20,
+#'                  inference = 3
+#'                  nb.draws = 200,
+#'                  confidence.interval = 0.90,
+#'                  indic.plot = 1)
 svar.ordering.2 <- function(Y,p,
                           posit.of.shock = 1,
                           nb.periods.IRF = 20,

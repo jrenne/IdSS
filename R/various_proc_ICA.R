@@ -101,7 +101,8 @@ simul.distri <- function(distri,nb.sim){
 }
 
 
-
+#' @keywords internal
+#' @noRd
 log.g.gaussian <- function(x,mu,sigma,indic.deriv=0){
   # Gaussian distribution
   # if indic.deriv = 1 -> computes the derivatives (1st and 2nd) of log.g w.r.t. x
@@ -116,7 +117,8 @@ log.g.gaussian <- function(x,mu,sigma,indic.deriv=0){
   return(list(log.g=log.g,d.log.g=d.log.g,d2.log.g=d2.log.g))
 }
 
-
+#' @keywords internal
+#' @noRd
 log.g.student <- function(x,nu,indic.deriv=0){
   # Student distribution
   # if indic.deriv = 1 -> computes the derivatives (1st and 2nd) of log.g w.r.t. x
@@ -131,6 +133,8 @@ log.g.student <- function(x,nu,indic.deriv=0){
   return(list(log.g=log.g,d.log.g=d.log.g,d2.log.g=d2.log.g))
 }
 
+#' @keywords internal
+#' @noRd
 log.g.laplace <- function(x,indic.deriv=0){
   # Student distribution
   # if indic.deriv = 1 -> computes the derivatives (1st and 2nd) of log.g w.r.t. x
@@ -146,7 +150,8 @@ log.g.laplace <- function(x,indic.deriv=0){
   return(list(log.g=log.g,d.log.g=d.log.g,d2.log.g=d2.log.g))
 }
 
-
+#' @keywords internal
+#' @noRd
 log.g.hyper.sec <- function(x,indic.deriv=0){
   # Student distribution
   # if indic.deriv = 1 -> computes the derivatives (1st and 2nd) of log.g w.r.t. x
@@ -538,7 +543,8 @@ make.nice.distri.name <- function(distri){
   return(vec.names)
 }
 
-
+#' @keywords internal
+#' @noRd
 round.fixed.length <- function(X,n){
   # This procedure is used in the automatic creation of Latex tables
   # x is numeric. The output is a string with n numbers after ".", even if they are 0s.
@@ -578,7 +584,8 @@ round.fixed.length <- function(X,n){
 # lines(x,g(x,sqrt(2)),type="l",col="black")
 
 
-
+#' @keywords internal
+#' @noRd
 log.g.mixt.gaussian <- function(x,mu,sigma,p,indic.deriv=0){
   # Mixture of Gaussian distributions
   # if indic.deriv = 1 -> computes the derivatives (1st and 2nd) of log.g w.r.t. x

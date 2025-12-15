@@ -1,4 +1,43 @@
 
+#' Identify structural VAR shocks via FEVD maximization (Uhlig-style)
+#'
+#' Identifies one or more structural shocks in a VAR by
+#' maximizing the (windowed) forecast-error variance (FEV) of user-selected
+#' variables over user-selected horizons. For each requested shock, it finds the
+#' orthonormal rotation that maximizes the FEV contribution of the target
+#' variable on a given horizon window, applies a sign normalization, enforces
+#' orthogonality with previously identified shocks, and returns impulse
+#' responses (IRFs). Optional parametric bootstrap yields IRF uncertainty bands.
+#'
+#' @param Y A numeric matrix of size \eqn{T \times n} with the VAR variables.
+#' @param p VAR lag order (integer).
+#' @param nb.shocks Number of structural shocks to identify
+#'   sequentially.
+#' @param names.of.shocks Character vector of length `nb.shocks`. Labels used
+#'   in plots.
+#' @param H1 Integer vectors (length `nb.shocks`). Start horizons
+#' for the FEV-maximization window of each shock.
+#' @param H2  Integer vectors (length `nb.shocks`). Start ends (inclusive)
+#' for the FEV-maximization window of each shock.
+#' @param variable Integer vector. 1-based indices of the
+#'   target variables whose FEV is maximized for each shock.
+#' @param norm Horizon at which the impact of the shock
+# is normalized to be positive.
+#' @param nb.periods.IRF Number of IRF horizons to compute.
+#' @param bootstrap.replications Number of parametric bootstrap
+#'   replications. If 1, returns point estimates only (no uncertainty).
+#' @param confidence.interval Numeric in (0,1). Central probability mass for IRF
+#'   bands (default 0.90).
+#' @param indic.plot If 1 (default), plots median IRFs with
+#'   upper/lower quantile bands for each identified shock.
+#'
+#' @return A list with components:
+#' \item{simulated.IRFs}{Array
+#'   of identified IRFs across bootstrap draws.}
+#' \item{stdv.IRFs}{Array  of pointwise
+#'   bootstrap standard deviations.}
+#' \item{CI.lower.bounds}{Array of lower quantiles.}
+#' \item{CI.upper.bounds}{Array nb.periods.IRF of upper quantiles}
 svar.fevmax <- function(Y,p,
                         nb.shocks,
                         names.of.shocks,

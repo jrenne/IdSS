@@ -1,4 +1,57 @@
 
+#' Simulate a (S)VAR Process
+#'
+#' This function has two modes, controlled by \code{indic.IRF}:
+#' \itemize{
+#'  \item 1) Simulation mode (default, \code{indic.IRF == 0}):
+#' starting from the initial state \code{y0.star}, simulates
+#' \code{nb.sim} periods of a VAR(p).
+#' If \code{eta} is supplied (an \code{nb.sim x n} matrix), its rows are used as
+#' the structural shocks. Otherwise shocks are generated as i.i.d. standard
+#' normal and then mapped by \code{B}.
+#' The result is an \code{nb.sim x n} matrix of simulated observations.
+#' \item 2) IRF mode (\code{indic.IRF != 0}):
+#' compute a finite-horizon impulse response to a one-time structural shock
+#' (length n). At t = 1, the state is set to the effect
+#' of \code{u.shock} through \code{B}; for t >= 2 the system evolves
+#' deterministically using the companion dynamics (i.e., no further shocks).
+#' The output is an \code{nb.sim x n} matrix containing the IRF
+#' path. In IRF mode, \code{eta} is ignored. }
+#' @param c Numeric vector of length \eqn{n}; the intercept term.
+#' @param Phi A list, each element of which is a \eqn{Phi_i} matrix. Hence it has p elements if we consider a VAR(p).
+#' @param B Numeric \eqn{n \times n} matrix; contemporaneous impact matrix
+#'   mapping structural shocks \eqn{u_t}to the reduced-form residuals.
+#' @param nb.sim Integer; number of simulated periods to produce (horizon).
+#' @param y0.star Numeric vector of length \eqn{n p}; initial companion-state
+#'  . Required when
+#'   \code{indic.IRF == 0}. Default is \code{NaN}.
+#' @param indic.IRF Integer flag. If \code{0} (default), run a forward
+#'   simulation from \code{y0.star}. If non-zero, compute an IRF.
+#' @param u.shock Numeric vector of length n; one-time structural shock used only in IRF mode.
+#' @param eta  Optional matrix of dimension \code{nb.sim x n} containing the
+#'   structural shocks \eqn{u_t} to use in simulation mode. If supplied, these are
+#'   used; otherwise \eqn{u_t \sim \mathcal{N}(0, I_n)} is generated.
+#'
+#' @return A numeric matrix of size \code{nb.sim x n}:
+#'   simulated series in simulation mode, or the IRF path in IRF mode.
+#' @examples
+#' ##  Example with (n = 2, p = 2)
+#' Phi <- list(
+#'   matrix(c(0.5, 0.1, 0.0, 0.3), 2, 2, byrow = TRUE),
+#'   matrix(c(0.2, 0.0, 0.0, 0.1), 2, 2, byrow = TRUE)
+#' )
+#' B  <- diag(2)
+#' c0 <- c(0, 0)
+#' y0 <- rep(0, length(Phi) * nrow(Phi[[1]]))
+#'
+#' ## 1) Simulation
+#' set.seed(1)
+#' Y  <- simul.VAR(c0, Phi, B, nb.sim = 10, y0.star = y0)
+#'
+#' ## 2) IRF (unit shock in variable 1)
+#' irf <- simul.VAR(c0, Phi, B, nb.sim = 12, y0.star = y0,
+#'                  indic.IRF = 1, u.shock = c(1, 0))
+#'
 simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
   # This function simulates a VAR model, initial condition = y0.star
   # Phi is a list, each element of which is a Phi_i matrix. Hence it has p elements if we consider a VAR(p)
@@ -52,6 +105,77 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
   return(Y[,1:n])
 }
 
+
+
+
+#' Simulate a (S)VARMA Process
+#'
+#'  This function has two modes, controlled by \code{indic.IRF}:
+#'  \itemize{
+#'    \item 1) Simulation mode (default, \code{indic.IRF == 0}):
+#'      generates simulated time series from a Vector Autoregressive Moving-Average (VARMA) model.
+#'      The model is defined by autoregressive and moving-average coefficient matrices, a constant,
+#'      and a mixing (impulse) matrix for the shocks. The simulation
+#'      starts from \code{Y0} when specified; otherwise, from the
+#'      process’s unconditional mean.
+#'      The result is an \code{nb.sim x n} matrix of simulated observations.
+#'    \item 2) IRF mode (\code{indic.IRF != 0}):
+#' computes a finite-horizon impulse response to a one-time structural shock \code{eta0}
+#' (length n). At t = 1, the system is hit by the shock \code{eta0} (applied through B or C,
+#' depending on the model specification).; For t ≥ 2, the system evolves deterministically under the companion dynamics (i.e., with no further shocks).
+#' The output is an \code{nb.sim × n} matrix containing the impulse response path.}
+#'
+#' @param Model A list specifying the VARMA model. Must contain:
+#' \itemize{
+#'     \item{\code{c}}{ Vector of constants.}
+#'     \item{\code{Phi}}{ Array of autoregressive coefficient matrices.}
+#'     \item{\code{Theta}}{ Array of moving-average coefficient matrices.}
+#'     \item{\code{C or B}}{ Mixing/impulse matrix of dimension \eqn{n \times n}. Captures the contemporaneous impact of
+#'     structural shock on \eqn{y_t}.}
+#'     \item{\code{distri}}{ list which characterizes the distribution of the shocks. Default is standard normal distributions.}
+#'   }
+#'
+#' @param nb.sim Integer. Number of simulation periods.
+#' @param Y0 Vector containing the initial values of the endogenous variables \eqn{Y}.
+#'   Must be of dimension \eqn{(p \times n) \times 1}, where n is the dimension of \eqn{y_t} (concatenation of lags \eqn{Y_1, \dots, Y_p}).
+#' @param eta0 Vector containing the initial values of the shocks \eqn{\eta}.
+#'   Must be of dimension \eqn{(q \times n) \times 1} (concatenation of lags \eqn{\eta_1, \dots, \eta_q}).
+#' @param indic.IRF Logical or numeric (0/1). If 1, the function produces IRFs by setting shocks to zero
+#'   after the first period. Default is 0.
+#'@details
+#'In Model, if B is specified, and not C, then the SVARMA specification is:
+#' \eqn{y_t = c + \Phi_1·y_{t-1} + ... + \Phi_p·y_{t-p} +
+#'       B·\eta_t + \Theta_1·B·\eta_{t-1} + ... + \Theta_q·B·\eta_{t-q}}.
+#'        Otherwise, if C is specified, the VARMA specification is:
+#'       \eqn{ y_t = c + \Phi_1·y_{t-1} + ... + \Phi_p·y_{t-p} +
+#'              C·\eta_t - \Theta_1·C·\eta_{t-1} - ... - \Theta_q·C·\eta_{t-q}}
+#'              (Notice the change in the signs in the MA part).
+#' @return A list with components:
+#' \describe{
+#'   \item{\code{Y}}{ Simulated endogenous variables.}
+#'   \item{\code{EPS}}{ Simulated reduced-form shocks.}
+#'   \item{\code{ETA}}{ Simulated structural shocks.}
+#'   \item{\code{V}}{ Simulated moving-average terms.}
+#' }
+#' @examples
+#' Simulate a simple 2-variable VARMA(1,1) process
+#' n <- 2
+#' p <- 1
+#' q <- 1
+#'
+#' Model <- list(
+#'   c = rep(0, n),
+#'   Phi = array(0.2, dim = c(n, n, p)),
+#'   Theta = array(0.1, dim = c(n, n, q)),
+#'   C = diag(n),
+#'   distri = list(type = rep("gaussian", n))
+#' )
+#'
+#' Y0 <- rep(0, n * p)
+#' eta0 <- rep(0, n * q)
+#'
+#' sim <- simul.VARMA(Model, nb.sim = 50, Y0 = Y0, eta0 = eta0)
+#' irf <- simul.VARMA(Model, nb.sim = 50, Y0 = Y0, eta0 = eta0, indic.IRF = 1)
 simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
   # Model is a list containing:
   # c (vector of constants),
@@ -150,6 +274,37 @@ simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
   return(list(Y = Y, EPS = EPS, ETA = ETA, V = V))
 }
 
+#'
+#'Build the VAR companion matrix
+#'
+#' Constructs the block companion matrix \eqn{\Phi} for a VAR(p) from the
+#' coefficient matrices \eqn{\Phi_1,\ldots,\Phi_p}. The input can be either
+#' a list of \eqn{n \times n} matrices or a 3-D array of dimension
+#' \eqn{n \times n \times p}. The returned matrix has size \eqn{(np) \times (np)}
+#' with the first block row \eqn{[\Phi_1 \ \Phi_2 \ \cdots \ \Phi_p]}, the
+#' sub-diagonal equal to an identity matrix \eqn{I_{n(p-1)}}, and zeros elsewhere.
+#' When \eqn{p = 1}, the result is simply \eqn{\Phi_1}.
+#'
+#' @param Phi: a list object or a 3-D array with coefficient matrices for the lagged endogenous variables.
+#'
+#' @returns  A numeric matrix representing the
+#'   VAR(p) companion matrix.
+#' @examples
+#' ## Example with a list of coefficient matrices (n = 2, p = 2)
+#'Phi_list <- list(
+#'  matrix(c(0.5, 0.8,
+#'           0.3, 0.2), 2, 2, byrow = TRUE),
+#'  matrix(c(0.1, 0.0,
+#'           0.0, 0.1), 2, 2, byrow = TRUE))
+#'
+#'## Example to check for stationarity
+#'  library(vars)
+#'  data <- US3var[,c("y.gdp.gap","infl")]
+#'  estimated.var <- VAR(data,p=3)
+#'  Phi <- Acoef(estimated.var)
+#'  PHI <- make.PHI(Phi) # autoregressive matrix of companion form.
+#'  print(abs(eigen(PHI)$values)) # check stationarity
+#'
 make.PHI <- function(Phi){
   if(class(Phi)=="list"){
     p <- length(Phi)
@@ -202,7 +357,62 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
 }
 
 
-make_variance_decompo <- function(Phi, B, maxHorizon,
+#' Variance Decomposition for SVAR Models
+#'
+#'This function produces a plot showing the variance decomposition
+#'associated with a VAR model defined by autoregressive matrices Phi
+#' and an impact matrix B.
+#'
+#' @details
+#' The function first constructs impulse responses by simulating the VAR
+#' (one unit shock at a time). Then, it computes the variance decomposition.
+#' Each panel corresponds to one endogenous variable; within a panel, the stacked
+#' colored bands sum to 1 at each horizon, showing the fraction of variance
+#' attributable to each shock.
+#'
+#' @param Phi Array of autoregressive coefficient matrices.
+#' @param B Numeric \eqn{n \times n} matrix; contemporaneous impact matrix
+#'   mapping structural shocks \eqn{u_t}to the reduced-form residuals.
+#' @param maxHorizon Integer; maximum horizon for the variance decomposition.
+#' @param mfrow Optional length-2 integer vector passed to \code{par(mfrow = ...)}
+#' to arrange multiple panels. Defaults internally to \code{c(1, n)} when not specified (i.e., when \code{mfrow = NA}).
+#' @param names.var Optional character vector of length \eqn{n} with labels for variables.
+#'   Defaults to \code{"Variable 1"}, \code{"Variable 2"}, … .
+#' @param names.shock Optional character vector of length \eqn{n} with labels for shocks.
+#'   Defaults to \code{"Shock 1"}, \code{"Shock 2"}, … .
+#'
+#' @returns the function output is a set of plots.
+#' @export
+#'
+#' @examples
+#' Phi <- array(NaN,c(2,2,2)) # (2,2,2) for (n,n,p)
+#' Phi[,,1] <- matrix(c(.6,0,.2,.5),2,2)
+#' Phi[,,2] <- matrix(c(-.1,.2,.1,.3),2,2)
+#' B <- matrix(c(.5,-1,1.5,.8),2,2)
+#' make.variance.decompo(Phi,B,maxHorizon=20)
+
+# Other exemple; but too long
+# library(vars) # provides 'VARselect' function l
+# library(IdSS)
+# First.date <- "1959-04-01"
+# Last.date  <- "2015-01-01"
+# data <- US3var
+# data <- data[(data$Date >= First.date) & (data$Date <= Last.date), ]
+# Y <- as.matrix(data[c("infl", "y.gdp.gap", "r")])
+# VARselect(Y, lag.max = 12)
+#
+# p <- 6
+# exogen <- matrix(data$commo, ncol = 1); colnames(exogen) <- "commo"
+# estVAR <- VAR(Y, p = p, exogen = exogen) # estimate the VAR model
+#
+# Phi <- Acoef(estVAR)
+# eps <- residuals(estVAR)
+# Omega <- var(eps) # covariance matrix of OLS residuals
+# B <- t(chol(Omega))
+# make_variance_decompo(Phi, B, maxHorizon = 50,
+# names.var = c("Inflation", "Real activity",
+# "Short-term rate"))
+make.variance.decompo <- function(Phi, B, maxHorizon,
                                   mfrow = NA,
                                   names.var = NA,
                                   names.shock = NA) {
@@ -268,3 +478,4 @@ make_variance_decompo <- function(Phi, B, maxHorizon,
 
   invisible(NULL)
 }
+

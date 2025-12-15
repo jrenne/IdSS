@@ -1,3 +1,22 @@
+#' Variance Decomposition from IRFs
+#'
+#' This functions computes the variance decomposition associated to a set
+#' of IRFs organised as variables x shocks x horizons x IRF draw.
+#'
+#' @details
+#' We must have that the number of variables is equal to the number of shocks. Hence,
+#' IRFs has 4 dimensions. If there is only one draw (e.g. estimated model)
+#' , then IRFs has only 3 dimensions.
+#' @param IRFs An array of IRFs with dimensions variables x shocks x horizons x IRF draws.
+#'
+#' @returns A list with components:
+#' \item{variance}{Array where variance(i,j,h,k,l) is the contribution
+#' of shock l to the forecast error covariance between variable i and j
+#' for IRF draw k at horizon h (if i=j then it's the contribution to the variance of i).}
+#' \item{Variance}{Array where Variance(i,j,h,k) is the forecast error covariance
+#' between variable i and j for IRF draw k at horizon h (if i=j then it's the variance of i).}
+#' \item{vardecomp}{Array where vardecomp(i,j,h,k,l) = variance(i,j,h,k,l)/Variance(i,j,h,k).}
+#' @export
 variance.decomp <- function(IRFs){
   # This functions computes the variance decomposition associated to a set
   # of IRFs organised as variables x shocks x horizons x IRF draws (we must
