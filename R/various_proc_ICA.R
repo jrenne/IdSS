@@ -311,6 +311,7 @@ func.2.minimize <- function(theta,Y,distri){
   return(- aux$log.L)
 }
 
+#' @export
 d.func.2.minimize <- function(theta,Y,distri){
   aux <- pseudo.log.L(Y,theta,distri,indic.Jacobian = 1)
   return(- aux$Jacobian)
