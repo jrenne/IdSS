@@ -330,9 +330,7 @@ make.PHI <- function(Phi){
   return(PHI)
 }
 
-
-#' @export
-simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
+simul.distri_OLD <- function(distri,nb.sim,basic.drawings=NaN){
   # Simulation of independent shocks
   eps <- NULL
   nb.var <- length(distri$type) # number of variables

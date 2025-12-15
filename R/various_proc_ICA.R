@@ -70,6 +70,7 @@ estim.SVAR.ICA <- function(endog.var,distri,p){
 }
 
 
+#' @export
 simul.distri <- function(distri,nb.sim){
   # Simulation of independent shocks
   eps <- NULL
