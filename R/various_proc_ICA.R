@@ -194,7 +194,7 @@ func.2.min.rec <- function(c1,Y,distri){
   return(-apply(g.aux$log.g,2,sum) + penalty)
 }
 
-
+#' @export
 make.M <- function(n){
   # function that builds M_n, the n2 x ((n-1)n/2) matrix that is such that Vec(A) = M_n a where a is the vectorized entries of the
   # lower triangular matrix of A and A is such that t(A) = -A.
