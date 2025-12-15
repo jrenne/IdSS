@@ -395,28 +395,6 @@ simul.distri <- function(distri,nb.sim,basic.drawings=NaN){
 #' Phi[,,2] <- matrix(c(-.1,.2,.1,.3),2,2)
 #' B <- matrix(c(.5,-1,1.5,.8),2,2)
 #' make.variance.decompo(Phi,B,maxHorizon=20)
-
-# Other exemple; but too long
-# library(vars) # provides 'VARselect' function l
-# library(IdSS)
-# First.date <- "1959-04-01"
-# Last.date  <- "2015-01-01"
-# data <- US3var
-# data <- data[(data$Date >= First.date) & (data$Date <= Last.date), ]
-# Y <- as.matrix(data[c("infl", "y.gdp.gap", "r")])
-# VARselect(Y, lag.max = 12)
-#
-# p <- 6
-# exogen <- matrix(data$commo, ncol = 1); colnames(exogen) <- "commo"
-# estVAR <- VAR(Y, p = p, exogen = exogen) # estimate the VAR model
-#
-# Phi <- Acoef(estVAR)
-# eps <- residuals(estVAR)
-# Omega <- var(eps) # covariance matrix of OLS residuals
-# B <- t(chol(Omega))
-# make_variance_decompo(Phi, B, maxHorizon = 50,
-# names.var = c("Inflation", "Real activity",
-# "Short-term rate"))
 #' @export
 make.variance.decompo <- function(Phi, B, maxHorizon,
                                   mfrow = NA,
