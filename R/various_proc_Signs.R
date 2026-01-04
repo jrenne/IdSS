@@ -308,6 +308,7 @@ svar.signs <- function(Y,p,
 ###################################################################3
 # Sign restrictions (non-recursive)
 
+#' @export
 svar.signs.aux <- function(Y,p,
                               nb.periods.IRF,
                               nb.shocks,
@@ -376,6 +377,7 @@ svar.signs.aux <- function(Y,p,
 ###################################################################3
 # Sign restrictions (recursive)
 
+#' @export
 svar.signs.aux.recursive <- function(Y,p,
                                      nb.periods.IRF,
                                      nb.shocks,
@@ -450,6 +452,7 @@ svar.signs.aux.recursive <- function(Y,p,
 ###################################################################3
 # Sign and zero restrictions
 
+#' @export
 svar.signs.aux.zeros <- function(Y,p,
                                      nb.periods.IRF,
                                      nb.shocks,

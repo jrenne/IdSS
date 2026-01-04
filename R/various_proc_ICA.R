@@ -1,5 +1,61 @@
 
-
+#' Estimate an SVAR model identified by Independent Component Analysis (ICA)
+#'
+#' This function estimates a Structural Vector Autoregression (SVAR) using
+#' Independent Component Analysis (ICA) for shock identification.
+#' The reduced-form VAR residuals are first pre-whitened, and the structural
+#' impact matrix is then identified by maximizing a pseudo-maximum likelihood
+#' criterion under non-Gaussianity assumptions on the structural shocks.
+#'
+#' The identification follows a parametrization based on a skew-symmetric
+#' matrix, ensuring orthogonality of the resulting transformation.
+#'
+#' @param endog.var A \eqn{T \times n} numeric matrix of endogenous variables,
+#' ordered consistently with the VAR specification.
+#'
+#' @param distri A character string specifying the assumed distribution of
+#' the structural shocks. This argument is passed to the likelihood and score
+#' functions used in the ICA step (e.g. `"laplace"`, `"mixt.gaussian"`, etc.).
+#'
+#' @param p An integer specifying the number of lags in the VAR model.
+#'
+#' @details
+#' The procedure consists of the following steps:
+#' \enumerate{
+#'   \item Estimation of a reduced-form VAR(\eqn{p}) equation-by-equation
+#'   using OLS.
+#'   \item Construction of the reduced-form residual matrix.
+#'   \item Pre-whitening of residuals using the Cholesky decomposition of
+#'   their covariance matrix.
+#'   \item ICA-based identification via optimization of a pseudo-likelihood
+#'   objective function under the assumed non-Gaussian distribution.
+#'   \item Recovery of the contemporaneous impact matrix and asymptotic
+#'   covariance matrix of the ICA parameters.
+#' }
+#'
+#' The ICA transformation matrix is parameterized using a skew-symmetric matrix
+#' whose free parameters are stacked in a vector of dimension \eqn{n(n-1)/2}.
+#'
+#' @return A list containing:
+#' \describe{
+#'   \item{C.PML}{An \eqn{n \times n} ICA rotation matrix estimated by
+#'   pseudo-maximum likelihood.}
+#'   \item{B.PML}{The estimated contemporaneous impact matrix of structural
+#'   shocks.}
+#'   \item{eta.PML}{A \eqn{T-p \times n} matrix of estimated structural shocks.}
+#'   \item{V}{The asymptotic covariance matrix of the ICA parameters.}
+#' }
+#'
+#'@examples
+#' First.date <- "1959-04-01"
+#' Last.date <- "2015-01-01"
+#' data <- US3var
+#' data <- data[(data$Date>=First.date)&(data$Date<=Last.date),]
+#' Y <- as.matrix(data[c("infl","y.gdp.gap","r")])
+#' distri <- list(type=c("mixt.gaussian","mixt.gaussian","mixt.gaussian"),
+#'                df=c(NaN,NaN,NaN),
+#'                p=c(0.5,.5,.5), mu=c(.1,.1,.1),sigma=c(.5,.7,1.3))
+#' ICA.res.no.commo <- estim.SVAR.ICA(Y,distri = distri,p=6)
 #' @export
 estim.SVAR.ICA <- function(endog.var,distri,p){
 
@@ -136,7 +192,8 @@ log.g.hyper.sec <- function(x,indic.deriv=0){
   return(list(log.g=log.g,d.log.g=d.log.g,d2.log.g=d2.log.g))
 }
 
-
+#' @keywords internal
+#' @noRd
 func.2.min.rec <- function(c1,Y,distri){
   # This function is used in the context of recursive PML
   c1.used <- sign(c1)*pmin(abs(c1),1)
@@ -198,6 +255,7 @@ make.M <- function(n){
 #   return(list(log.L=log.L,d.log.L=d.log.L))
 # }
 
+#' @export
 make.C <- function(AA,n){
   A <- matrix(0,n,n)
   A[lower.tri(A)] <- AA
@@ -210,6 +268,8 @@ make.C <- function(AA,n){
   return(C)
 }
 
+#' @keywords internal
+#' @noRd
 pseudo.log.L <- function(Y,AA,distri,indic.Jacobian=0){
   # AA is \mathcal{A}
   # Y is the matrix of observations
@@ -236,11 +296,15 @@ pseudo.log.L <- function(Y,AA,distri,indic.Jacobian=0){
   return(list(log.L=log.L,Jacobian=Jacobian))
 }
 
+#' @keywords internal
+#' @noRd
 pseudo.log.L.used <- function(AA,Y,distri){
   res <- pseudo.log.L(Y,AA,distri)
   return(-res$log.L)
 }
 
+#' @keywords internal
+#' @noRd
 gICA <- function(eps,distri,indic.deriv=0){
   # Y is of dimension T x n
   # distri is a list:
@@ -287,6 +351,8 @@ d.func.2.minimize <- function(theta,Y,distri){
   return(- aux$Jacobian)
 }
 
+#' @keywords internal
+#' @noRd
 make.g.stars <- function(eps,distri){
   res.g <- gICA(eps,distri,indic.deriv=1)
   g.1.star <- apply(res.g$d.log.L,2,mean)
@@ -296,6 +362,7 @@ make.g.stars <- function(eps,distri){
   return(list(g.1.star=g.1.star,g.2.star=g.2.star,g.3.star=g.3.star,g.4.star=g.4.star))
 }
 
+#' @export
 make.Omega <- function(eps,distri){
   n <- dim(eps)[2]
 
@@ -344,6 +411,7 @@ make.Omega <- function(eps,distri){
   return(Omega)
 }
 
+#' @export
 make.A.matrix <- function(eps,distri,C){
   n <- dim(eps)[2]
 
@@ -402,7 +470,7 @@ make.Asympt.Cov.delta <- function(eps,distri,C){
   return(mat.cov)
 }
 
-
+#' @export
 find.permut.old <- function(C,C.permut){
   n <- dim(C)[1]
   vec.1 <- matrix(1,n,1)
@@ -424,7 +492,7 @@ find.permut.old <- function(C,C.permut){
   return(C.permut.permut)
 }
 
-
+#' @export
 do.permut <- function(n){
   if(n==1){
     all.permut <- array(1,c(1,1,1))
@@ -448,7 +516,7 @@ do.permut <- function(n){
   return(all.permut)
 }
 
-
+#' @export
 do.signs <- function(A){
   n <- dim(A)[2]
   #print(n)
@@ -473,6 +541,8 @@ do.signs <- function(A){
 }
 
 
+#' @keywords internal
+#' @noRd
 find.permut <- function(C,C.permut){
   n <- dim(C)[1]
   best.ddiff <- 10000000000
@@ -495,6 +565,9 @@ find.permut <- function(C,C.permut){
               best.permut = best.permut))
 }
 
+
+#' @keywords internal
+#' @noRd
 make.nice.distri.name <- function(distri){
   vec.names <- NULL
   for(i in 1:length(distri$type)){
@@ -619,6 +692,9 @@ log.g.mixt.gaussian <- function(x,mu,sigma,p,indic.deriv=0){
   return(list(log.g=log.g,d.log.g=d.log.g,d2.log.g=d2.log.g))
 }
 
+
+#' @keywords internal
+#' @noRd
 make.Asympt.Cov.delta_1 <- function(eps,distri,C){
   n <- dim(eps)[2]
   T <- dim(eps)[1]
@@ -630,6 +706,9 @@ make.Asympt.Cov.delta_1 <- function(eps,distri,C){
   return(mat.cov)
 }
 
+
+#' @keywords internal
+#' @noRd
 make.Asympt.Cov.deltaAronde <- function(eps,distri,C){
   A0 <- make.AA(C)
   n <- dim(eps)[2]
@@ -647,6 +726,9 @@ make.Asympt.Cov.deltaAronde <- function(eps,distri,C){
   return(mat.cov.Aronde)
 }
 
+
+#' @keywords internal
+#' @noRd
 make.AA <- function(C){
   n <- dim(C)[1]
   A <- matrix(0,n,n)

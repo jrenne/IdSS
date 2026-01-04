@@ -47,18 +47,20 @@
 #'   \item{\code{all.CI.median}}{Matrix of medians of the simulated IRFs.}
 #' }
 #' @examples
+#' library(vars)
+#' library(IdSS)
 #' data("USmonthlyExample")
 #' y <- as.matrix(USmonthlyExample[considered.variables])
 #' ## Monte-Carlo
 #' res.svar.ordering <-
-#'  svar.ordering.2(y,p=3, posit.of.shock = 5,
+#'  svar.ordering(y,p=3, posit.of.shock = 5,
 #'                  nb.periods.IRF = 20,
 #'                  inference = 3,
 #'                  nb.draws = 200,
 #'                  confidence.interval = 0.90,
 #'                  indic.plot = 1)
 #' @export
-svar.ordering.2 <- function(Y,p,
+svar.ordering <- function(Y,p,
                           posit.of.shock = 1,
                           nb.periods.IRF = 20,
                           inference = 0, # 0 -> no inference, 1 -> parametric bootstrap, 2 <- non-parametric bootstrap, 3 <- monte carlo
@@ -182,6 +184,7 @@ svar.ordering.2 <- function(Y,p,
 #############################################################################################3
 # Generates the matrix VAR regressors of size (T-p)*(1+n*p)
 
+#' @export
 VAR.regressors <- function(Y,p){
   T <- dim(Y)[1]
   n <- dim(Y)[2]
@@ -195,6 +198,7 @@ VAR.regressors <- function(Y,p){
 #############################################################################################3
 # Transforms the Phis and constant terms into the vector phi
 
+#' @export
 VEC.coef <- function(Phi,cst,n,p){
   phi <- cst
   for (i in 1:p){
@@ -208,6 +212,7 @@ VEC.coef <- function(Phi,cst,n,p){
 #############################################################################################3
 # Computes the (vector) mean and variance-covariance of Phi
 
+#' @export
 distrib.phi <- function(Y,p,Phi,cst,Omega,n){
   phi <- VEC.coef(Phi,cst,n,p)
   X <- VAR.regressors(Y,p)
@@ -221,6 +226,7 @@ distrib.phi <- function(Y,p,Phi,cst,Omega,n){
 #############################################################################################3
 # Computes the (vector) mean and variance-covariance of Omega
 
+#' @export
 distrib.omega <- function(Omega,n,T){
   omega <- NULL
   for (i in 1:n){
@@ -249,6 +255,7 @@ distrib.omega <- function(Omega,n,T){
 #############################################################################################3
 # Monte Carlo simulations
 
+#' @export
 montecarlo <- function(Y,p,
                        nb.periods.IRF,
                        n,
@@ -347,6 +354,7 @@ montecarlo <- function(Y,p,
 # Gaussian parametric bootstrap simulations
 # (see Stock and Watson, appendix A.2)
 
+#' @export
 param.bootstrap <- function(Y,p,
                             nb.periods.IRF,
                             n,
@@ -414,6 +422,7 @@ param.bootstrap <- function(Y,p,
 #############################################################################################3
 # Non-parametric bootstrap simulations
 
+#' @export
 nonparam.bootstrap <- function(Y,p,
                             nb.periods.IRF,
                             n,
@@ -483,6 +492,7 @@ nonparam.bootstrap <- function(Y,p,
 #############################################################################################3
 # Non-parametric bootstrap after bootstrap simulations
 
+#' @export
 bootstrap.after.bootstrap <- function(Y,p,
                                nb.periods.IRF,
                                n,
@@ -625,6 +635,7 @@ bootstrap.after.bootstrap <- function(Y,p,
 #############################################################################################3
 # SVAR with Cholesky decomposition generating all IRFs (alternative to svar.ordering.aux)
 
+#' @export
 svar.ordering.all <- function(Y,p,
                               nb.periods.IRF,
                               n
@@ -661,6 +672,7 @@ svar.ordering.all <- function(Y,p,
 #############################################################################################3
 # Simulate IRFs for all shocks (one set of IRFs by shock)
 
+#' @export
 simul.VAR.all <- function(c=rep(0,n),n,Phi,
                           B.hat,
                           nb.periods.IRF,
