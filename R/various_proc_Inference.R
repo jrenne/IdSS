@@ -50,6 +50,7 @@
 #' library(vars)
 #' library(IdSS)
 #' data("USmonthlyExample")
+#' considered.variables <- c("LIP","UNEMP","LCPI","LPCOM","FFR","NBR","TTR","M1")
 #' y <- as.matrix(USmonthlyExample[considered.variables])
 #' ## Monte-Carlo
 #' res.svar.ordering <-

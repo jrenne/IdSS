@@ -159,7 +159,7 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
 #'   \item{\code{V}}{ Simulated moving-average terms.}
 #' }
 #' @examples
-#' Simulate a simple 2-variable VARMA(1,1) process
+#' #Simulate a simple 2-variable VARMA(1,1) process
 #' n <- 2
 #' p <- 1
 #' q <- 1

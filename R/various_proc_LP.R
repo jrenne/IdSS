@@ -175,9 +175,9 @@ tsls <- function(Y,X,Z,q){
 #'
 #'This function implements the IV-SVAR approach.
 #'  We are interested in the IRF of Y following a structural shock (\eqn{\eta_1}),
-#'  Z being an instrument for \eqn{eta_1}
+#'  Z being an instrument for \eqn{\eta_1}
 #'  Y is modelled as a VAR(p) model.
-#'  The IRF are scaled in such a way that the contemporaneous impact of eta_1 on Y_1 is 1.
+#'  The IRF are scaled in such a way that the contemporaneous impact of \eqn{\eta_1} on \eqn{Y_1} is 1.
 #' @param Y A \code{T x n} numeric matrix
 #'   of endogenous variables, with rows as time and columns as series.
 #' @param Z A T × k (k ≥ 1) numeric matrix with external instrument(s) for the
@@ -216,14 +216,13 @@ tsls <- function(Y,X,Z,q){
 #'
 #'
 #' @examples
+#' library(vars)
 #' data("USmonthly_1990_to_2012")
-#'
 #' indic.shock.name <- which(names(USmonthly_1990_to_2012)%in%c("FF4_TC","ED2_TC"))
 #' Z <- as.matrix(USmonthly_1990_to_2012[,indic.shock.name])
 #' considered.variables <- c("GS1","LIP","LCPI","EBP")
 #' Y <- as.matrix(USmonthly_1990_to_2012[,considered.variables])
 #' n <- length(considered.variables)
-#'
 #' svar.iv(Y,Z,p = 4,names.of.variables=considered.variables,
 #'        nb.periods.IRF = 20,
 #'        z.AR.order=1,
