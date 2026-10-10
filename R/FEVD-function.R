@@ -143,11 +143,10 @@ svar.fevmax <- function(Y,p,
         plot(CI.median[i,j,],type="l",lwd=2,xlab="",ylab="",
              ylim=c(min(CI.lower.bounds[i,j,]),
                     max(CI.upper.bounds[i,j,])),
-             main=paste("Effect of ",names.of.shocks[j]," on ",
-                        names.of.variables[i],sep=""))
+             main=paste0("(",letters[i],") ",names.of.variables[i]))
         abline(h=0,col="grey")
-        lines(CI.lower.bounds[i,j,],col="red",lty=2,lwd=2)
-        lines(CI.upper.bounds[i,j,],col="red",lty=2,lwd=2)}
+        lines(CI.lower.bounds[i,j,],col="grey45",lty=2,lwd=2)
+        lines(CI.upper.bounds[i,j,],col="grey45",lty=2,lwd=2)}
     }
   }
 

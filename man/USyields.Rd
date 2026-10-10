@@ -20,4 +20,9 @@ USyields
 \description{
 Monthly-average constant-maturity Treasury yields for eight maturities.
 }
+\details{
+**Redistribution status:** FRED labels the underlying H.15 series
+  “Public Domain: Citation Requested.” IdSS averages daily observations by
+  calendar month.
+}
 \keyword{datasets}

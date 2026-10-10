@@ -219,11 +219,12 @@ tsls <- function(Y,X,Z,q){
 #' @examples
 #' library(vars)
 #' data("USmonthly_1990_to_2012")
-#' indic.shock.name <- which(names(USmonthly_1990_to_2012)%in%c("FF4_TC","ED2_TC"))
-#' Z <- as.matrix(USmonthly_1990_to_2012[,indic.shock.name])
+#' Z <- as.matrix(USmonthly_1990_to_2012[, "BRW", drop = FALSE])
 #' considered.variables <- c("GS1","LIP","LCPI","EBP")
 #' Y <- as.matrix(USmonthly_1990_to_2012[,considered.variables])
-#' n <- length(considered.variables)
+#' keep <- complete.cases(Y, Z)
+#' Y <- Y[keep, , drop = FALSE]
+#' Z <- Z[keep, , drop = FALSE]
 #' svar.iv(Y,Z,p = 4,names.of.variables=considered.variables,
 #'        nb.periods.IRF = 20,
 #'        z.AR.order=1,
@@ -337,11 +338,11 @@ svar.iv <- function(Y,Z,p,
       ylim <- if (is.null(all.CI.lower.bounds)) range(IRFs[,i]) else
         range(all.CI.lower.bounds[,i], all.CI.upper.bounds[,i])
       plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="", ylim=ylim,
-           main=paste("Effect of shock on ",names.of.variables[i],sep=""))
+           main=paste0("(",letters[i],") ",names.of.variables[i]))
       abline(h=0,col="grey")
       if (!is.null(all.CI.lower.bounds)) {
-        lines(all.CI.lower.bounds[,i],col="red",lty=2,lwd=2)
-        lines(all.CI.upper.bounds[,i],col="red",lty=2,lwd=2)
+        lines(all.CI.lower.bounds[,i],col="grey45",lty=2,lwd=2)
+        lines(all.CI.upper.bounds[,i],col="grey45",lty=2,lwd=2)
       }
     }
   }
@@ -723,10 +724,10 @@ make.jorda.irf <- function(Y,
       upper.bound <- IRFs[,i] + qnorm(1-(1-confidence.interval)/2) * all.stdv.IRFs[,i]
       plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="",
            ylim=c(min(lower.bound),max(upper.bound)),
-           main=paste("Effect of shock on ",considered.variables[i],sep=""))
+           main=paste0("(",letters[i],") ",considered.variables[i]))
       abline(h=0,col="grey")
-      lines(lower.bound,col="red",lty=2,lwd=2)
-      lines(upper.bound,col="red",lty=2,lwd=2)
+      lines(lower.bound,col="grey45",lty=2,lwd=2)
+      lines(upper.bound,col="grey45",lty=2,lwd=2)
     }
   }
 
@@ -801,11 +802,12 @@ make.jorda.irf <- function(Y,
 #'
 #' @examples
 #' data("USmonthly_1990_to_2012")
-#' indic.shock.name <- which(names(USmonthly_1990_to_2012)%in%c("FF4_TC","ED2_TC"))
-#' Z <- as.matrix(USmonthly_1990_to_2012[,indic.shock.name])
+#' Z <- as.matrix(USmonthly_1990_to_2012[, "BRW", drop = FALSE])
 #' considered.variables <- c("GS1","LIP","LCPI","EBP")
 #' Y <- as.matrix(USmonthly_1990_to_2012[,considered.variables])
-#' n <- length(considered.variables)
+#' keep <- complete.cases(Y, Z)
+#' Y <- Y[keep, , drop = FALSE]
+#' Z <- Z[keep, , drop = FALSE]
 #' res.LP.IV <- make.LPIV.irf(Y,Z,
 #'                            nb.periods.IRF = 20,
 #'                            nb.lags.Y.4.control=4,
@@ -870,10 +872,10 @@ make.LPIV.irf <- function(Y,Z,
       upper.bound <- IRFs[,i] + qnorm(1-(1-confidence.interval)/2) * all.stdv.IRFs[,i]
       plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="",
            ylim=c(min(lower.bound),max(upper.bound)),
-           main=paste("Effect of shock on ",considered.variables[i],sep=""))
+           main=paste0("(",letters[i],") ",considered.variables[i]))
       abline(h=0,col="grey")
-      lines(lower.bound,col="red",lty=2,lwd=2)
-      lines(upper.bound,col="red",lty=2,lwd=2)
+      lines(lower.bound,col="grey45",lty=2,lwd=2)
+      lines(upper.bound,col="grey45",lty=2,lwd=2)
     }
   }
 

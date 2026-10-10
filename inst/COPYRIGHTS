@@ -1,0 +1,14 @@
+IdSS data copyright and licence notice
+======================================
+
+The MIT licence in DESCRIPTION covers the IdSS software. It does not override
+copyright, database rights, attribution requirements, or use restrictions that
+apply to third-party datasets.
+
+In particular, the Jordà--Schularick--Taylor Macrohistory Database is provided
+under CC BY-NC-SA 4.0 and is not covered by the IdSS MIT licence. Fernald's TFP
+data, used in `USsentiment`, may be reproduced with attribution for
+noncommercial purposes. Other data have the source-specific terms recorded in
+the dataset register.
+
+See DATA-SOURCES.md in the installed package for the dataset-by-dataset audit.

@@ -71,11 +71,12 @@ This function implements the IV-SVAR approach.
 \examples{
 library(vars)
 data("USmonthly_1990_to_2012")
-indic.shock.name <- which(names(USmonthly_1990_to_2012)\%in\%c("FF4_TC","ED2_TC"))
-Z <- as.matrix(USmonthly_1990_to_2012[,indic.shock.name])
+Z <- as.matrix(USmonthly_1990_to_2012[, "BRW", drop = FALSE])
 considered.variables <- c("GS1","LIP","LCPI","EBP")
 Y <- as.matrix(USmonthly_1990_to_2012[,considered.variables])
-n <- length(considered.variables)
+keep <- complete.cases(Y, Z)
+Y <- Y[keep, , drop = FALSE]
+Z <- Z[keep, , drop = FALSE]
 svar.iv(Y,Z,p = 4,names.of.variables=considered.variables,
        nb.periods.IRF = 20,
        z.AR.order=1,

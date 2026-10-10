@@ -9,13 +9,19 @@ A data frame with 117 observations and five variables: `date`,
   `CH_GDP`, `CH_CPI`, `US_CPI`, and `US_GDP`.
 }
 \source{
-Archived public macroeconomic series in
-  `data-raw/US_CH_quarterly/US_CH_quarterly.xlsx`.
+Eurostat, OECD, and U.S. Bureau of Economic Analysis, retrieved
+  through FRED. Archived input: `data-raw/US_CH_quarterly/US_CH_quarterly.xlsx`.
 }
 \usage{
 US_CH_quarterly
 }
 \description{
 Quarterly GDP and consumer-price series for Switzerland and the United States.
+}
+\details{
+**Redistribution status:** permitted with attribution under the
+  Eurostat and OECD reuse terms; the BEA component is public domain. The four
+  columns are FRED transformations of `CLVMNACSAB1GQCH`,
+  `CPALTT01CHQ659N`, `CPALTT01USQ659N`, and `GDPC1`.
 }
 \keyword{datasets}

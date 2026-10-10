@@ -78,11 +78,12 @@ Newey–West lag length of \code{h + 1}.
 }
 \examples{
 data("USmonthly_1990_to_2012")
-indic.shock.name <- which(names(USmonthly_1990_to_2012)\%in\%c("FF4_TC","ED2_TC"))
-Z <- as.matrix(USmonthly_1990_to_2012[,indic.shock.name])
+Z <- as.matrix(USmonthly_1990_to_2012[, "BRW", drop = FALSE])
 considered.variables <- c("GS1","LIP","LCPI","EBP")
 Y <- as.matrix(USmonthly_1990_to_2012[,considered.variables])
-n <- length(considered.variables)
+keep <- complete.cases(Y, Z)
+Y <- Y[keep, , drop = FALSE]
+Z <- Z[keep, , drop = FALSE]
 res.LP.IV <- make.LPIV.irf(Y,Z,
                            nb.periods.IRF = 20,
                            nb.lags.Y.4.control=4,

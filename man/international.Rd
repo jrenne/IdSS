@@ -11,9 +11,9 @@ A data frame with 279 observations and 35 variables. `date` is a
   annual real-GDP growth; `STR_` variables contain short-term rates.
 }
 \source{
-Course archive assembled from public macroeconomic series. See
-  `data-raw/International/CPI_GDP.xlsx` in the source package for the archived
-  input and series labels.
+OECD Main Economic Indicators, retrieved through Federal Reserve
+  Economic Data (FRED). The original FRED series identifiers are retained in
+  `data-raw/International/CPI_GDP.xlsx` in the source package.
 }
 \usage{
 international
@@ -22,5 +22,11 @@ international
 Quarterly CPI and real-GDP series, together with selected short-term interest
 rates, for Australia, Canada, Switzerland, the United Kingdom, Indonesia,
 India, Japan, Korea, and the United States.
+}
+\details{
+**Redistribution status:** permitted with attribution under the
+  OECD data terms, subject to any series-specific or third-party restriction.
+  The archived workbook identifies the included series as OECD series. See
+  `DATA-SOURCES.md` in the installed package.
 }
 \keyword{datasets}

@@ -173,11 +173,11 @@ svar.ordering <- function(Y,p,
       plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="",
            ylim=c(min(all.CI.lower.bounds[,i]),
                   max(all.CI.upper.bounds[,i])),
-           main=paste("Effect of shock on ",names.of.variables[i],sep=""))
+           main=paste0("(",letters[i],") ",names.of.variables[i]))
       abline(h=0,col="grey")
       if(inference>0){
-        lines(all.CI.lower.bounds[,i],col="red",lty=2,lwd=2)
-        lines(all.CI.upper.bounds[,i],col="red",lty=2,lwd=2)
+        lines(all.CI.lower.bounds[,i],col="grey45",lty=2,lwd=2)
+        lines(all.CI.upper.bounds[,i],col="grey45",lty=2,lwd=2)
       }
     }
   }

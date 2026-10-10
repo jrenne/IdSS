@@ -7,21 +7,23 @@
 \alias{USmonthly_1990_to_2012}
 \title{Monthly U.S. Macroeconomic and Monetary-Policy Data}
 \format{
-`USmonthly` is a data frame with 670 observations and 49 variables;
+`USmonthly` is a data frame with 670 observations and 16 variables;
   `USmonthlyExample` contains 366 observations; and
   `USmonthly_1990_to_2012` contains 266 observations. All have the same
   columns. `DATES` is a `Date`; core variables include `NBR`, `TTR`, `M1`,
-  `LIP`, `UNEMP`, `LCPI`, `FFR`, `LPCOM`, `GS1`, and `EBP`. Other columns
-  contain monetary-policy shock measures and factors. Use `names(USmonthly)`
-  for the complete list.
+  `LIP`, `UNEMP`, `LCPI`, `FFR`, `LPCOM`, `GS1`, and `EBP`. `BRW` is the
+  monthly monetary-policy shock of Bu, Rogers, and Wu (2019); the remaining
+  columns are first differences used by course examples.
 
-An object of class \code{data.frame} with 366 rows and 49 columns.
+An object of class \code{data.frame} with 366 rows and 16 columns.
 
-An object of class \code{data.frame} with 266 rows and 49 columns.
+An object of class \code{data.frame} with 266 rows and 16 columns.
 }
 \source{
-Public macroeconomic series merged with Valerie A. Ramey's monetary
-  policy data, \url{https://econweb.ucsd.edu/~vramey/research.html#mon}.
+Board of Governors of the Federal Reserve System, Bureau of Labor
+  Statistics, and other U.S. government series retrieved through FRED; Bu,
+  Rogers, and Wu monetary-policy shocks and the excess bond premium retrieved
+  from the Board of Governors' Economic Research Data pages.
 }
 \usage{
 USmonthly
@@ -31,7 +33,17 @@ USmonthlyExample
 USmonthly_1990_to_2012
 }
 \description{
-Monthly U.S. macroeconomic series merged with alternative monetary-policy
-shock measures. Three sample variants are supplied for reproducible examples.
+Monthly U.S. macroeconomic series and a redistributable monetary-policy shock.
+Three sample variants are supplied for reproducible examples.
+}
+\details{
+**Redistribution status:** public-domain U.S. government and Federal
+  Reserve Board series; attribution is requested. `BRW` begins in January
+  1994, so earlier observations are missing. See `DATA-SOURCES.md` in the
+  installed package.
+}
+\references{
+Bu, C., Rogers, J., and Wu, W. (2021). A Unified Measure of Fed
+  Monetary Policy Shocks. *Journal of Monetary Economics*, 118, 331--349.
 }
 \keyword{datasets}

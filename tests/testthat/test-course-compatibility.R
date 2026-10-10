@@ -13,12 +13,26 @@ test_that("the public interface required by both books is exported", {
 
 test_that("all course datasets are installed", {
   required <- c(
-    "BQ", "international", "JST", "levpan", "QuarterlyUS", "Ramey",
-    "smi", "US_CH_quarterly", "US3var", "USmonthly",
+    "BQ", "eurusd", "international", "JST", "USsentiment", "QuarterlyUS",
+    "US_CH_quarterly", "US3var", "USmonthly",
     "USmonthly_1990_to_2012", "USmonthlyExample", "USyields"
   )
   available <- data(package = "IdSS")$results[, "Item"]
   expect_true(all(required %in% available))
+})
+
+test_that("every installed dataset appears in the provenance register", {
+  register <- system.file("DATA-SOURCES.md", package = "IdSS")
+  expect_true(nzchar(register))
+  text <- paste(readLines(register, warn = FALSE), collapse = "\n")
+  required <- c(
+    "BQ", "eurusd", "international", "JST", "USsentiment", "QuarterlyUS",
+    "US_CH_quarterly", "US3var", "USmonthly",
+    "USmonthly_1990_to_2012", "USmonthlyExample", "USyields"
+  )
+  expect_true(all(vapply(required, function(x) {
+    grepl(paste0("`", x, "`"), text, fixed = TRUE)
+  }, logical(1))))
 })
 
 test_that("ARMA simulation reproduces elementary impulse responses", {
@@ -76,6 +90,9 @@ test_that("VARMA simulation accepts the historical Mu intercept alias", {
 test_that("SVAR ordering accepts the historical bootstrap argument", {
   set.seed(13)
   y <- matrix(rnorm(80), ncol = 2)
+  colnames(y) <- c("y1", "y2")
+  grDevices::pdf(tempfile(fileext = ".pdf"))
+  on.exit(grDevices::dev.off(), add = TRUE)
   result <- svar.ordering(
     y, p = 1, nb.periods.IRF = 3,
     nb.bootstrap.replications = 2, indic.plot = 0
@@ -84,9 +101,22 @@ test_that("SVAR ordering accepts the historical bootstrap argument", {
 })
 
 test_that("every exported object has an installed help alias", {
-  documented <- vapply(getNamespaceExports("IdSS"), function(topic) {
-    length(utils::help(topic, package = "IdSS")) > 0
-  }, logical(1))
+  man_dir <- testthat::test_path("..", "..", "man")
+  exports <- getNamespaceExports("IdSS")
+  if (dir.exists(man_dir)) {
+    rd_lines <- unlist(lapply(
+      list.files(man_dir, pattern = "[.]Rd$", full.names = TRUE),
+      readLines, warn = FALSE
+    ))
+    alias_lines <- grep("^\\\\alias\\{", rd_lines, value = TRUE)
+    aliases <- sub("^\\\\alias\\{(.*)\\}$", "\\1", alias_lines)
+    documented <- exports %in% aliases
+  } else {
+    documented <- vapply(exports, function(topic) {
+      length(utils::help(topic, package = "IdSS")) > 0
+    }, logical(1))
+  }
+  names(documented) <- exports
   expect_true(all(documented), info = paste(names(documented)[!documented],
                                             collapse = ", "))
 })

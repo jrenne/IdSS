@@ -3,7 +3,7 @@
 \docType{data}
 \name{BQ}
 \alias{BQ}
-\title{Blanchard--Quah Quarterly Data}
+\title{Open Reconstruction of the Blanchard--Quah Quarterly Example}
 \format{
 A data frame with 159 observations and three variables:
 \describe{
@@ -13,16 +13,23 @@ A data frame with 159 observations and three variables:
 }
 }
 \source{
-Blanchard--Quah replication data distributed through the
-  Boston College Statistical Software Components archive,
-  \url{https://econpapers.repec.org/software/bocbocode/rtz00017.htm}.
+U.S. Bureau of Economic Analysis series `GNPC96` and U.S. Bureau of
+  Labor Statistics series `UNRATE`, retrieved through FRED.
 }
 \usage{
 BQ
 }
 \description{
-Quarterly U.S. output-growth and detrended-unemployment series prepared for
-the long-run-restrictions example of Blanchard and Quah.
+Quarterly U.S. real-GNP growth and detrended unemployment prepared from
+public U.S. government series for the long-run-restrictions example of
+Blanchard and Quah. This is a teaching reconstruction, not the authors'
+original vintage dataset.
+}
+\details{
+**Redistribution status:** public-domain U.S. government series;
+  attribution to the original agencies and FRED is requested. Quarterly real
+  GNP growth is demeaned on either side of the historical sample break, and
+  the quarterly-average unemployment rate is linearly detrended.
 }
 \references{
 Blanchard, O. J. and Quah, D. (1989). The Dynamic Effects of

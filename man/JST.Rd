@@ -22,4 +22,10 @@ JST
 Long-run annual macroeconomic and financial data used for international
 panel examples.
 }
+\details{
+**Licence:** Creative Commons Attribution-NonCommercial-ShareAlike
+  4.0 (CC BY-NC-SA 4.0). Use is non-commercial, attribution is mandatory,
+  and shared copies or adaptations must use the same licence. The database
+  site lists additional citations for return and bank-balance-sheet series.
+}
 \keyword{datasets}

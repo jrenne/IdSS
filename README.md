@@ -28,6 +28,21 @@ help(package = "IdSS")
 ?USmonthly
 ```
 
+## Data provenance and licences
+
+The package's MIT licence covers the IdSS software; it does not automatically
+cover third-party data. The dataset-by-dataset register in
+[`inst/DATA-SOURCES.md`](inst/DATA-SOURCES.md) records the original source,
+transformations, required attribution, licence, and redistribution decision.
+
+The former `BQ` replication snapshot and `Ramey`/`USmonthly` compilation have
+been replaced by teaching datasets assembled from redistributable U.S.
+government and Federal Reserve Board series. The uncleared SMI snapshot has
+likewise been replaced by `eurusd`, a public-domain Federal Reserve H.10 series
+retrieved through FRED. The uncleared `levpan` extract has been replaced by
+`USsentiment`, an independently rebuilt U.S. dataset using public-sector data
+and Fernald's noncommercial, attribution-required TFP series.
+
 ## Development checks
 
 From the package directory:

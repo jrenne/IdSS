@@ -16,13 +16,20 @@ A data frame with 224 observations and six variables:
 }
 }
 \source{
-Public U.S. macroeconomic series archived under
-  `data-raw/US3var/` in the source package.
+U.S. Bureau of Economic Analysis, Bureau of Labor Statistics,
+  Congressional Budget Office, Federal Reserve Board, and Energy Information
+  Administration series retrieved through FRED and archived under
+  `data-raw/US3var/`.
 }
 \usage{
 US3var
 }
 \description{
 Quarterly U.S. series prepared for small structural-VAR examples.
+}
+\details{
+**Redistribution status:** permitted with attribution. The source
+  series are U.S. government data; IdSS merges them and computes output and
+  unemployment gaps, inflation, and commodity-price growth.
 }
 \keyword{datasets}

@@ -512,12 +512,13 @@ make.variance.decompo <- function(Phi, B, maxHorizon,
     plot(1:maxHorizon, rep(0, maxHorizon),
          ylim = c(0, 1), col = "white", las = 1,
          xlab = "", ylab = "Variance share",
-         main = names.var[variable])
+         main = paste0("(", letters[variable], ") ", names.var[variable]))
 
+    fills <- grDevices::gray.colors(n, start = 0.25, end = 0.85)
     for (k in 1:n) {
       polygon(c(1:maxHorizon, maxHorizon:1),
               c(res_variable[k,], rev(res_variable[k + 1,])),
-              col = k + 1, border = NA)
+              col = fills[k], border = NA)
     }
 
     # Add custom "Horizon" label inside the plot

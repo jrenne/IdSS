@@ -9,8 +9,9 @@ A data frame with 314 observations and five variables: `date`, `FFR`,
   `GDPC1`, `GDPDEF`, and `GDPPOT`.
 }
 \source{
-Archived public U.S. macroeconomic series in
-  `data-raw/QuarterlyUS/QVAR.xlsx`.
+Board of Governors of the Federal Reserve System, U.S. Bureau of
+  Economic Analysis, and U.S. Congressional Budget Office, retrieved through
+  FRED. The archived workbook is `data-raw/QuarterlyUS/QVAR.xlsx`.
 }
 \usage{
 QuarterlyUS
@@ -18,5 +19,10 @@ QuarterlyUS
 \description{
 A compact quarterly U.S. dataset containing the federal funds rate, real GDP,
 the GDP deflator, and potential GDP.
+}
+\details{
+**Redistribution status:** public-domain U.S. government series;
+  attribution to the original agencies and FRED is requested. `FFR` is FRED
+  series `BOGZ1FL072052006Q`; the other series retain their FRED identifiers.
 }
 \keyword{datasets}
