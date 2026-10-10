@@ -31,6 +31,11 @@
 #'     \item 3 = Monte Carlo
 #'     \item 4 = bootstrap-after-bootstrap
 #'   }
+#' @param nb.draws Positive integer giving the number of Monte Carlo or
+#'   bootstrap draws used when `inference` is non-zero.
+#' @param nb.bootstrap.replications Deprecated compatibility alias for
+#'   `nb.draws`. When supplied while `inference = 0`, parametric bootstrap
+#'   inference is selected, matching the historical course interface.
 #' @param confidence.interval A numeric value between 0 and 1 indicating the
 #'   confidence level for bootstrap intervals (e.g. 0.90 for 90% intervals).
 #'   Default is 0.90.
@@ -66,9 +71,15 @@ svar.ordering <- function(Y,p,
                           nb.periods.IRF = 20,
                           inference = 0, # 0 -> no inference, 1 -> parametric bootstrap, 2 <- non-parametric bootstrap, 3 <- monte carlo
                           nb.draws = 100, # This is used if inference >0
+                          nb.bootstrap.replications = NULL,
                           confidence.interval = 0.90, # expressed in pp.
                           indic.plot = 1 # Plots are displayed if = 1.
 ){
+
+  if (!is.null(nb.bootstrap.replications)) {
+    nb.draws <- nb.bootstrap.replications
+    if (inference == 0) inference <- 1
+  }
 
   names.of.variables <- colnames(Y)
 
@@ -185,7 +196,8 @@ svar.ordering <- function(Y,p,
 #############################################################################################3
 # Generates the matrix VAR regressors of size (T-p)*(1+n*p)
 
-#' @export
+#' @keywords internal
+#' @noRd
 VAR.regressors <- function(Y,p){
   T <- dim(Y)[1]
   n <- dim(Y)[2]
@@ -199,7 +211,8 @@ VAR.regressors <- function(Y,p){
 #############################################################################################3
 # Transforms the Phis and constant terms into the vector phi
 
-#' @export
+#' @keywords internal
+#' @noRd
 VEC.coef <- function(Phi,cst,n,p){
   phi <- cst
   for (i in 1:p){
@@ -213,7 +226,8 @@ VEC.coef <- function(Phi,cst,n,p){
 #############################################################################################3
 # Computes the (vector) mean and variance-covariance of Phi
 
-#' @export
+#' @keywords internal
+#' @noRd
 distrib.phi <- function(Y,p,Phi,cst,Omega,n){
   phi <- VEC.coef(Phi,cst,n,p)
   X <- VAR.regressors(Y,p)
@@ -227,7 +241,8 @@ distrib.phi <- function(Y,p,Phi,cst,Omega,n){
 #############################################################################################3
 # Computes the (vector) mean and variance-covariance of Omega
 
-#' @export
+#' @keywords internal
+#' @noRd
 distrib.omega <- function(Omega,n,T){
   omega <- NULL
   for (i in 1:n){
@@ -256,7 +271,8 @@ distrib.omega <- function(Omega,n,T){
 #############################################################################################3
 # Monte Carlo simulations
 
-#' @export
+#' @keywords internal
+#' @noRd
 montecarlo <- function(Y,p,
                        nb.periods.IRF,
                        n,
@@ -285,7 +301,7 @@ montecarlo <- function(Y,p,
 
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
-  simulated.Phi   <- replicate(nb.draws, Phi)
+  simulated.Phi   <- matrix(rep(Phi, nb.draws), nrow = p, ncol = nb.draws)
 
   # Get the asymptotic distribution of estimated coefficients
   distrib.phi.res <- distrib.phi(Y,p,Phi,cst,Omega,n)
@@ -355,7 +371,8 @@ montecarlo <- function(Y,p,
 # Gaussian parametric bootstrap simulations
 # (see Stock and Watson, appendix A.2)
 
-#' @export
+#' @keywords internal
+#' @noRd
 param.bootstrap <- function(Y,p,
                             nb.periods.IRF,
                             n,
@@ -383,7 +400,7 @@ param.bootstrap <- function(Y,p,
 
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
-  simulated.Phi   <- replicate(nb.draws, Phi)
+  simulated.Phi   <- matrix(rep(Phi, nb.draws), nrow = p, ncol = nb.draws)
 
   y0.star <- NULL
   for(k in p:1){
@@ -423,7 +440,8 @@ param.bootstrap <- function(Y,p,
 #############################################################################################3
 # Non-parametric bootstrap simulations
 
-#' @export
+#' @keywords internal
+#' @noRd
 nonparam.bootstrap <- function(Y,p,
                             nb.periods.IRF,
                             n,
@@ -450,7 +468,7 @@ nonparam.bootstrap <- function(Y,p,
 
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
-  simulated.Phi   <- replicate(nb.draws, Phi)
+  simulated.Phi   <- matrix(rep(Phi, nb.draws), nrow = p, ncol = nb.draws)
 
   y0.star <- NULL
   for(k in p:1){
@@ -493,7 +511,8 @@ nonparam.bootstrap <- function(Y,p,
 #############################################################################################3
 # Non-parametric bootstrap after bootstrap simulations
 
-#' @export
+#' @keywords internal
+#' @noRd
 bootstrap.after.bootstrap <- function(Y,p,
                                nb.periods.IRF,
                                n,
@@ -522,7 +541,7 @@ bootstrap.after.bootstrap <- function(Y,p,
 
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
   simulated.B.hat <- replicate(nb.draws, B.hat, simplify="array")
-  simulated.Phi   <- replicate(nb.draws, Phi)
+  simulated.Phi   <- matrix(rep(Phi, nb.draws), nrow = p, ncol = nb.draws)
   simulated.phi   <- array(replicate(nb.draws, phi, simplify="array"),c(dim(phi)[1],nb.draws))
 
   y0.star <- NULL
@@ -636,7 +655,8 @@ bootstrap.after.bootstrap <- function(Y,p,
 #############################################################################################3
 # SVAR with Cholesky decomposition generating all IRFs (alternative to svar.ordering.aux)
 
-#' @export
+#' @keywords internal
+#' @noRd
 svar.ordering.all <- function(Y,p,
                               nb.periods.IRF,
                               n
@@ -673,7 +693,8 @@ svar.ordering.all <- function(Y,p,
 #############################################################################################3
 # Simulate IRFs for all shocks (one set of IRFs by shock)
 
-#' @export
+#' @keywords internal
+#' @noRd
 simul.VAR.all <- function(c=rep(0,n),n,Phi,
                           B.hat,
                           nb.periods.IRF,
@@ -697,5 +718,3 @@ simul.VAR.all <- function(c=rep(0,n),n,Phi,
   }
   return(IRFs = IRFs)
 }
-
-

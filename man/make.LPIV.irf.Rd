@@ -26,9 +26,9 @@ for the shock variable.}
 \eqn{H} for which impulse responses are computed.}
 
 \item{nb.lags.Y.4.control}{Non-negative integer specifying the number of lags
-of \code{Y} included as control variables in each local projection.
+of \code{Y} included as control variables in each local projection.}
 
-' @param nb.lags.Z.4.control Non-negative integer specifying the number of lags
+\item{nb.lags.Z.4.control}{Non-negative integer specifying the number of lags
 of \code{Z} included as control variables in each local projection.}
 
 \item{indic.plot}{Logical or integer (1/0). If equal to 1, impulse responses

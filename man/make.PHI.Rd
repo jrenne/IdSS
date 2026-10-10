@@ -7,7 +7,8 @@
 make.PHI(Phi)
 }
 \arguments{
-\item{Phi:}{a list object or a 3-D array with coefficient matrices for the lagged endogenous variables.}
+\item{Phi}{A list or three-dimensional array containing the coefficient
+matrices for the lagged endogenous variables.}
 }
 \value{
 A numeric matrix representing the

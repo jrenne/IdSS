@@ -43,6 +43,12 @@ Default is 0.90.}
 \item{nb.draws}{Number of draws (number of random orthogonal
 rotations that are generated in order to search for admissible IRFs).}
 
+\item{sign.restrictions}{A list of length `nb.shocks`, where each element is
+a matrix specifying the sign restrictions for one structural shock.
+Each matrix has one row per endogenous variable and one column per
+restriction horizon. Entries equal to `1`, `-1`, and `0` respectively
+request a non-negative response, a non-positive response, or no restriction.}
+
 \item{horizon}{A list of length nb.shocks, where each element specifies the
 time horizons (in periods) over which the corresponding sign restrictions
 (given in sign.restrictions) must hold.}
@@ -55,24 +61,6 @@ are imposed in a recursive (sequential) manner or not.}
 This argument is only used if both sign and zero restrictions are imposed
  together. If left empty (the default), only the restrictions given in
  `sign.restrictions` are applied.}
-
-\item{sign.restriction}{A list of length nb.shocks, where each element is
-  a matrix specifying the sign restrictions for one structural shock.
-  - Each matrix must have dimension n × n (with n = number of endogenous variables).
-
-  - The entry \eqn{[i, j]} corresponds to the restriction on the response of
-    variable \eqn{i} to shock \eqn{j}.
-
-  - Values should be:
-
- { 1: the response must be non-negative (≥ 0),}
-
-{ -1: the response must be non-positive (≤ 0),}
-
-{ 0: no restriction.}
-
-  - Restrictions can be imposed at multiple horizons; see the companion
-    horizon argument.}
 }
 \value{
 A list with the following elements:

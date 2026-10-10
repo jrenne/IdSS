@@ -220,6 +220,16 @@ func.2.min.rec <- function(c1,Y,distri){
   return(-apply(g.aux$log.g,2,sum) + penalty)
 }
 
+#' Construct the ICA Skew-Symmetric Basis
+#'
+#' Constructs the linear map used to transform the free lower-triangular
+#' parameters of a skew-symmetric matrix into its vectorized form.
+#'
+#' @param n Positive integer giving the number of structural shocks.
+#' @return A numeric matrix with `n^2` rows and `n * (n - 1) / 2` columns.
+#' @examples
+#' M <- make.M(3)
+#' dim(M)
 #' @export
 make.M <- function(n){
   # function that builds M_n, the n2 x ((n-1)n/2) matrix that is such that Vec(A) = M_n a where a is the vectorized entries of the
@@ -255,7 +265,8 @@ make.M <- function(n){
 #   return(list(log.L=log.L,d.log.L=d.log.L))
 # }
 
-#' @export
+#' @keywords internal
+#' @noRd
 make.C <- function(AA,n){
   A <- matrix(0,n,n)
   A[lower.tri(A)] <- AA
@@ -303,8 +314,24 @@ pseudo.log.L.used <- function(AA,Y,distri){
   return(-res$log.L)
 }
 
-#' @keywords internal
-#' @noRd
+#' ICA Score Contributions
+#'
+#' Evaluates the component-wise score contribution used by the package's
+#' independent-component pseudo-likelihood.
+#'
+#' @param eps Numeric matrix whose rows are observations and columns are shocks.
+#' @param distri Distribution specification list accepted by
+#'   [simul.distri()].
+#' @param indic.deriv Integer flag. Zero returns score contributions; a non-zero
+#'   value requests the corresponding derivative contribution.
+#' @return A numeric matrix with the same dimensions as `eps`.
+#' @examples
+#' eps <- matrix(rnorm(20), 10, 2)
+#' distri <- list(type = c("gaussian", "gaussian"),
+#'                mu = c(0, 0), sigma = c(1, 1),
+#'                df = c(NA, NA), p = c(NA, NA))
+#' gICA(eps, distri)
+#' @export
 gICA <- function(eps,distri,indic.deriv=0){
   # Y is of dimension T x n
   # distri is a list:
@@ -339,12 +366,36 @@ gICA <- function(eps,distri,indic.deriv=0){
   return(list(log.L=log.L,d.log.L=d.log.L,d2.log.L=d2.log.L))
 }
 
+#' ICA pseudo-likelihood objective
+#'
+#' Evaluates the negative pseudo-log-likelihood used to estimate the ICA
+#' rotation in a structural VAR. It is exposed because the Identification
+#' course uses it directly with [stats::optim()]. Most users will normally
+#' call [estim.SVAR.ICA()] instead.
+#'
+#' @param theta Numeric vector containing the free parameters of the
+#'   skew-symmetric ICA parametrization.
+#' @param Y Numeric matrix whose rows are pre-whitened reduced-form residuals.
+#' @param distri List describing the marginal pseudo-distributions; see
+#'   [gICA()] for the supported components.
+#'
+#' @return A numeric scalar equal to the negative pseudo-log-likelihood.
+#' @seealso [d.func.2.minimize()], [estim.SVAR.ICA()]
 #' @export
 func.2.minimize <- function(theta,Y,distri){
   aux <- pseudo.log.L(Y,theta,distri)
   return(- aux$log.L)
 }
 
+#' Gradient of the ICA pseudo-likelihood objective
+#'
+#' Computes the gradient of [func.2.minimize()] with respect to the free ICA
+#' parameters. It can be supplied as the `gr` argument of [stats::optim()].
+#'
+#' @inheritParams func.2.minimize
+#'
+#' @return A numeric vector with the same length as `theta`.
+#' @seealso [func.2.minimize()], [estim.SVAR.ICA()]
 #' @export
 d.func.2.minimize <- function(theta,Y,distri){
   aux <- pseudo.log.L(Y,theta,distri,indic.Jacobian = 1)
@@ -362,7 +413,8 @@ make.g.stars <- function(eps,distri){
   return(list(g.1.star=g.1.star,g.2.star=g.2.star,g.3.star=g.3.star,g.4.star=g.4.star))
 }
 
-#' @export
+#' @keywords internal
+#' @noRd
 make.Omega <- function(eps,distri){
   n <- dim(eps)[2]
 
@@ -411,7 +463,8 @@ make.Omega <- function(eps,distri){
   return(Omega)
 }
 
-#' @export
+#' @keywords internal
+#' @noRd
 make.A.matrix <- function(eps,distri,C){
   n <- dim(eps)[2]
 
@@ -457,6 +510,23 @@ make.A.matrix <- function(eps,distri,C){
   return(A)
 }
 
+#' Asymptotic Covariance for ICA Rotation Parameters
+#'
+#' Computes the sandwich covariance matrix used for the free rotation
+#' parameters in the non-Gaussian SVAR identification procedure.
+#'
+#' @param eps Numeric matrix of estimated structural shocks.
+#' @param distri Distribution specification list used by [gICA()].
+#' @param C Numeric square ICA rotation matrix.
+#' @return A symmetric covariance matrix of dimension
+#'   `n * (n - 1) / 2`, where `n = ncol(eps)`.
+#' @examples
+#' set.seed(1)
+#' eps <- matrix(rnorm(300), 100, 3)
+#' distri <- list(type = rep("gaussian", 3), mu = rep(0, 3),
+#'                sigma = rep(1, 3), df = rep(NA, 3), p = rep(NA, 3))
+#' V <- make.Asympt.Cov.delta(eps, distri, diag(3))
+#' dim(V)
 #' @export
 make.Asympt.Cov.delta <- function(eps,distri,C){
   n <- dim(eps)[2]
@@ -470,7 +540,8 @@ make.Asympt.Cov.delta <- function(eps,distri,C){
   return(mat.cov)
 }
 
-#' @export
+#' @keywords internal
+#' @noRd
 find.permut.old <- function(C,C.permut){
   n <- dim(C)[1]
   vec.1 <- matrix(1,n,1)
@@ -492,7 +563,8 @@ find.permut.old <- function(C,C.permut){
   return(C.permut.permut)
 }
 
-#' @export
+#' @keywords internal
+#' @noRd
 do.permut <- function(n){
   if(n==1){
     all.permut <- array(1,c(1,1,1))
@@ -516,7 +588,8 @@ do.permut <- function(n){
   return(all.permut)
 }
 
-#' @export
+#' @keywords internal
+#' @noRd
 do.signs <- function(A){
   n <- dim(A)[2]
   #print(n)

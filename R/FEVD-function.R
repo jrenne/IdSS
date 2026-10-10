@@ -21,8 +21,8 @@
 #' for the FEV-maximization window of each shock.
 #' @param variable Integer vector. 1-based indices of the
 #'   target variables whose FEV is maximized for each shock.
-#' @param norm Horizon at which the impact of the shock
-# is normalized to be positive.
+#' @param norm Integer vector of length `nb.shocks`. For each shock, the horizon
+#'   at which its response is normalized to be positive.
 #' @param nb.periods.IRF Number of IRF horizons to compute.
 #' @param bootstrap.replications Number of parametric bootstrap
 #'   replications. If 1, returns point estimates only (no uncertainty).
@@ -32,12 +32,12 @@
 #'   upper/lower quantile bands for each identified shock.
 #'
 #' @return A list with components:
-#' \item{simulated.IRFs}{Array
-#'   of identified IRFs across bootstrap draws.}
-#' \item{stdv.IRFs}{Array  of pointwise
-#'   bootstrap standard deviations.}
-#' \item{CI.lower.bounds}{Array of lower quantiles.}
-#' \item{CI.upper.bounds}{Array nb.periods.IRF of upper quantiles}
+#' \describe{
+#'   \item{simulated.IRFs}{Array of identified IRFs across bootstrap draws.}
+#'   \item{stdv.IRFs}{Array of pointwise bootstrap standard deviations.}
+#'   \item{CI.lower.bounds}{Array of lower pointwise quantiles.}
+#'   \item{CI.upper.bounds}{Array of upper pointwise quantiles.}
+#' }
 #' @export
 svar.fevmax <- function(Y,p,
                         nb.shocks,
@@ -84,7 +84,7 @@ svar.fevmax <- function(Y,p,
   simulated.Phi   <- replicate(1,Phi, simplify="array")
   # if bootstrap then generate and store simulated IRFs, B.hat and Phi
   if(bootstrap.replications>1){
-    bootstrap.res <- param.bootstrap(y,p,nb.periods.IRF,n,bootstrap.replications,
+    bootstrap.res <- param.bootstrap(Y,p,nb.periods.IRF,n,bootstrap.replications,
                                      posit.of.shock = 0)
     simulated.IRFs  <- bootstrap.res$simulated.IRFs
     simulated.B.hat <- bootstrap.res$simulated.B.hat
@@ -117,8 +117,9 @@ svar.fevmax <- function(Y,p,
         Q[,i,l] <- Q[,i:n,l]%*%eigvec
       }else{
         Q[,i,l] <- - Q[,i:n,l]%*%eigvec}
-      Q[,(i+1):n,l] <- Null(Q[,1:i,l]) # we ensure that columns 3 to n
-      #   are orthogonal to the first 2
+      if (i < n) {
+        Q[,(i+1):n,l] <- Null(Q[,1:i,l])
+      }
     }
     for (t in 1:nb.periods.IRF){
       IRFs.final[,,t,l] <- simulated.IRFs[,,t,l]%*%Q[,,l]

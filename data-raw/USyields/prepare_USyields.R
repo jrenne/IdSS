@@ -3,7 +3,11 @@
 setwd("~/Dropbox/Teaching/MyRpackages/AEC/data-raw/USyields")
 
 library(fredr)
-fredr_set_key("df65e14c054697a52b4511e77fcfa1f3")
+fred_api_key <- Sys.getenv("FRED_API_KEY")
+if (!nzchar(fred_api_key)) {
+  stop("Set FRED_API_KEY in the environment before refreshing USyields.")
+}
+fredr_set_key(fred_api_key)
 start_date <- as.Date("1990-01-01"); end_date <- as.Date("2022-01-01")
 f <- function(ticker){
   fredr(series_id = ticker,
@@ -32,7 +36,6 @@ USyields <- data.frame(date=yd1$date,
                        Y30 = yd30$value)
 
 save(USyields,file="../../data/USyields.rda")
-
 
 
 

@@ -11,6 +11,7 @@ svar.ordering(
   nb.periods.IRF = 20,
   inference = 0,
   nb.draws = 100,
+  nb.bootstrap.replications = NULL,
   confidence.interval = 0.9,
   indic.plot = 1
 )
@@ -34,6 +35,13 @@ impulse response functions are computed. Default is 20.}
   \item 3 = Monte Carlo
   \item 4 = bootstrap-after-bootstrap
 }}
+
+\item{nb.draws}{Positive integer giving the number of Monte Carlo or
+bootstrap draws used when `inference` is non-zero.}
+
+\item{nb.bootstrap.replications}{Deprecated compatibility alias for
+`nb.draws`. When supplied while `inference = 0`, parametric bootstrap
+inference is selected, matching the historical course interface.}
 
 \item{confidence.interval}{A numeric value between 0 and 1 indicating the
 confidence level for bootstrap intervals (e.g. 0.90 for 90% intervals).
@@ -64,6 +72,7 @@ confidence intervals if requested.
 library(vars)
 library(IdSS)
 data("USmonthlyExample")
+considered.variables <- c("LIP","UNEMP","LCPI","LPCOM","FFR","NBR","TTR","M1")
 y <- as.matrix(USmonthlyExample[considered.variables])
 ## Monte-Carlo
 res.svar.ordering <-

@@ -44,25 +44,11 @@
 #' @param indic.plot Plots are displayed if = 1.
 #' @param nb.draws Number of draws (number of random orthogonal
 #' rotations that are generated in order to search for admissible IRFs).
-#' @param sign.restriction A list of length nb.shocks, where each element is
+#' @param sign.restrictions A list of length `nb.shocks`, where each element is
 #'   a matrix specifying the sign restrictions for one structural shock.
-#'   - Each matrix must have dimension n × n (with n = number of endogenous variables).
-#'
-#'   - The entry \eqn{[i, j]} corresponds to the restriction on the response of
-#'     variable \eqn{i} to shock \eqn{j}.
-#'
-#'   - Values should be:
-
-#'
-#'  { 1: the response must be non-negative (≥ 0),}
-#'
-#' { -1: the response must be non-positive (≤ 0),}
-#'
-#' { 0: no restriction.}
-#'
-
-#'   - Restrictions can be imposed at multiple horizons; see the companion
-#'     horizon argument.
+#'   Each matrix has one row per endogenous variable and one column per
+#'   restriction horizon. Entries equal to `1`, `-1`, and `0` respectively
+#'   request a non-negative response, a non-positive response, or no restriction.
 #' @param horizon  A list of length nb.shocks, where each element specifies the
 #'   time horizons (in periods) over which the corresponding sign restrictions
 #'   (given in sign.restrictions) must hold.
@@ -308,7 +294,8 @@ svar.signs <- function(Y,p,
 ###################################################################3
 # Sign restrictions (non-recursive)
 
-#' @export
+#' @keywords internal
+#' @noRd
 svar.signs.aux <- function(Y,p,
                               nb.periods.IRF,
                               nb.shocks,
@@ -377,7 +364,8 @@ svar.signs.aux <- function(Y,p,
 ###################################################################3
 # Sign restrictions (recursive)
 
-#' @export
+#' @keywords internal
+#' @noRd
 svar.signs.aux.recursive <- function(Y,p,
                                      nb.periods.IRF,
                                      nb.shocks,
@@ -452,7 +440,8 @@ svar.signs.aux.recursive <- function(Y,p,
 ###################################################################3
 # Sign and zero restrictions
 
-#' @export
+#' @keywords internal
+#' @noRd
 svar.signs.aux.zeros <- function(Y,p,
                                      nb.periods.IRF,
                                      nb.shocks,
@@ -524,6 +513,4 @@ svar.signs.aux.zeros <- function(Y,p,
     admissible.rotation = admissible.rotation # Q
   ))
 }
-
-
 

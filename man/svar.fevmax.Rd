@@ -39,7 +39,8 @@ for the FEV-maximization window of each shock.}
 \item{variable}{Integer vector. 1-based indices of the
 target variables whose FEV is maximized for each shock.}
 
-\item{norm}{Horizon at which the impact of the shock}
+\item{norm}{Integer vector of length `nb.shocks`. For each shock, the horizon
+at which its response is normalized to be positive.}
 
 \item{nb.periods.IRF}{Number of IRF horizons to compute.}
 
@@ -54,12 +55,12 @@ upper/lower quantile bands for each identified shock.}
 }
 \value{
 A list with components:
-\item{simulated.IRFs}{Array
-  of identified IRFs across bootstrap draws.}
-\item{stdv.IRFs}{Array  of pointwise
-  bootstrap standard deviations.}
-\item{CI.lower.bounds}{Array of lower quantiles.}
-\item{CI.upper.bounds}{Array nb.periods.IRF of upper quantiles}
+\describe{
+  \item{simulated.IRFs}{Array of identified IRFs across bootstrap draws.}
+  \item{stdv.IRFs}{Array of pointwise bootstrap standard deviations.}
+  \item{CI.lower.bounds}{Array of lower pointwise quantiles.}
+  \item{CI.upper.bounds}{Array of upper pointwise quantiles.}
+}
 }
 \description{
 Identifies one or more structural shocks in a VAR by

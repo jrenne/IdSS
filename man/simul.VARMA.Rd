@@ -8,8 +8,9 @@ simul.VARMA(Model, nb.sim, Y0 = NaN, eta0, indic.IRF = 0)
 }
 \arguments{
 \item{Model}{A list specifying the VARMA model. Must contain:
-\itemize{
-    \item{\code{c}}{ Vector of constants.}
+\describe{
+    \item{\code{c} or \code{Mu}}{ Vector of constants. `Mu` is retained as
+      a backwards-compatible alias used by the MacroEconometrics course.}
     \item{\code{Phi}}{ Array of autoregressive coefficient matrices.}
     \item{\code{Theta}}{ Array of moving-average coefficient matrices.}
     \item{\code{C or B}}{ Mixing/impulse matrix of dimension \eqn{n \times n}. Captures the contemporaneous impact of
@@ -63,7 +64,7 @@ In Model, if B is specified, and not C, then the SVARMA specification is:
              (Notice the change in the signs in the MA part).
 }
 \examples{
-Simulate a simple 2-variable VARMA(1,1) process
+#Simulate a simple 2-variable VARMA(1,1) process
 n <- 2
 p <- 1
 q <- 1

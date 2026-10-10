@@ -6,7 +6,8 @@
 
 # this function is used in NW.LongRunVariance()
 
-#' @export
+#' @keywords internal
+#' @noRd
 autocov <- function(X,n){
   if(class(X)[1]!="matrix"){
     T <- length(X)
@@ -325,19 +326,23 @@ svar.iv <- function(Y,Z,p,
     all.CI.lower.bounds <- NULL
     all.CI.upper.bounds <- NULL
     all.B.tilde.1 <- NULL
+    Sigma.IV <- NULL
+    cor.Sigma.IV <- NULL
   }
 
   if(indic.plot==1){
     par(mfrow=c(2,
                 ifelse(round(n/2)==n/2,n/2,(n+1)/2)))
     for(i in 1:n){
-      plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="",
-           ylim=c(min(all.CI.lower.bounds[,i]),
-                  max(all.CI.upper.bounds[,i])),
-           main=paste("Effect of shock on ",considered.variables[i],sep=""))
+      ylim <- if (is.null(all.CI.lower.bounds)) range(IRFs[,i]) else
+        range(all.CI.lower.bounds[,i], all.CI.upper.bounds[,i])
+      plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="", ylim=ylim,
+           main=paste("Effect of shock on ",names.of.variables[i],sep=""))
       abline(h=0,col="grey")
-      lines(all.CI.lower.bounds[,i],col="red",lty=2,lwd=2)
-      lines(all.CI.upper.bounds[,i],col="red",lty=2,lwd=2)
+      if (!is.null(all.CI.lower.bounds)) {
+        lines(all.CI.lower.bounds[,i],col="red",lty=2,lwd=2)
+        lines(all.CI.upper.bounds[,i],col="red",lty=2,lwd=2)
+      }
     }
   }
 
@@ -357,7 +362,8 @@ svar.iv <- function(Y,Z,p,
 
 
 
-#' @export
+#' @keywords internal
+#' @noRd
 svar.iv.aux <- function(Y,Z,p,
                         names.of.variables,
                         nb.periods.IRF){
@@ -570,7 +576,8 @@ svar.iv.aux <- function(Y,Z,p,
 # }
 
 
-#' @export
+#' @keywords internal
+#' @noRd
 svar.ordering.aux <- function(Y,p,
                               posit.of.shock,
                               nb.periods.IRF){
@@ -775,7 +782,7 @@ make.jorda.irf <- function(Y,
 #' @param nb.lags.Y.4.control Non-negative integer specifying the number of lags
 #' of \code{Y} included as control variables in each local projection.
 #'
-#' ' @param nb.lags.Z.4.control Non-negative integer specifying the number of lags
+#' @param nb.lags.Z.4.control Non-negative integer specifying the number of lags
 #' of \code{Z} included as control variables in each local projection.
 #'
 #' @param indic.plot Logical or integer (1/0). If equal to 1, impulse responses

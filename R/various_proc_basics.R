@@ -127,8 +127,9 @@ simul.VAR <- function(c,Phi,B,nb.sim,y0.star=NaN,indic.IRF=0,u.shock=0,eta=NaN){
 #' The output is an \code{nb.sim × n} matrix containing the impulse response path.}
 #'
 #' @param Model A list specifying the VARMA model. Must contain:
-#' \itemize{
-#'     \item{\code{c}}{ Vector of constants.}
+#' \describe{
+#'     \item{\code{c} or \code{Mu}}{ Vector of constants. `Mu` is retained as
+#'       a backwards-compatible alias used by the MacroEconometrics course.}
 #'     \item{\code{Phi}}{ Array of autoregressive coefficient matrices.}
 #'     \item{\code{Theta}}{ Array of moving-average coefficient matrices.}
 #'     \item{\code{C or B}}{ Mixing/impulse matrix of dimension \eqn{n \times n}. Captures the contemporaneous impact of
@@ -234,7 +235,13 @@ simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
     Model$distri <- list(type=rep("gaussian",n))
   }
 
-  MU <- c(Model$c, rep(0, n * (p - 1)))
+  intercept <- Model$c
+  if (is.null(intercept)) intercept <- Model$Mu
+  if (is.null(intercept)) intercept <- rep(0, n)
+  if (length(intercept) != n) {
+    stop("Model$c (or its alias Model$Mu) must contain one value per variable.")
+  }
+  MU <- c(intercept, rep(0, n * (p - 1)))
   PHI <- make.PHI(Model$Phi)
 
   if(is.na(Y0[1])){
@@ -287,9 +294,10 @@ simul.VARMA <- function(Model,nb.sim,Y0=NaN,eta0,indic.IRF=0){
 #' sub-diagonal equal to an identity matrix \eqn{I_{n(p-1)}}, and zeros elsewhere.
 #' When \eqn{p = 1}, the result is simply \eqn{\Phi_1}.
 #'
-#' @param Phi: a list object or a 3-D array with coefficient matrices for the lagged endogenous variables.
+#' @param Phi A list or three-dimensional array containing the coefficient
+#'   matrices for the lagged endogenous variables.
 #'
-#' @returns  A numeric matrix representing the
+#' @return A numeric matrix representing the
 #'   VAR(p) companion matrix.
 #' @examples
 #' ## Example with a list of coefficient matrices (n = 2, p = 2)
@@ -528,4 +536,3 @@ make.variance.decompo <- function(Phi, B, maxHorizon,
 
   invisible(NULL)
 }
-
