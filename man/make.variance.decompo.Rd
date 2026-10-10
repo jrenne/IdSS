@@ -42,7 +42,7 @@ and an impact matrix B.
 The function first constructs impulse responses by simulating the VAR
 (one unit shock at a time). Then, it computes the variance decomposition.
 Each panel corresponds to one endogenous variable; within a panel, the stacked
-colored bands sum to 1 at each horizon, showing the fraction of variance
+grayscale bands sum to 1 at each horizon, showing the fraction of variance
 attributable to each shock.
 }
 \examples{

@@ -448,7 +448,7 @@ simul.distri <- function(distri,nb.sim){
 #' The function first constructs impulse responses by simulating the VAR
 #' (one unit shock at a time). Then, it computes the variance decomposition.
 #' Each panel corresponds to one endogenous variable; within a panel, the stacked
-#' colored bands sum to 1 at each horizon, showing the fraction of variance
+#' grayscale bands sum to 1 at each horizon, showing the fraction of variance
 #' attributable to each shock.
 #'
 #' @param Phi Array of autoregressive coefficient matrices.
@@ -530,7 +530,7 @@ make.variance.decompo <- function(Phi, B, maxHorizon,
 
     # Legend adjustment: fit better inside multi-plot layouts
     legend("topleft", horiz = FALSE, bty = "n",
-           pch = 22,pt.bg = 2:(n + 1),
+           pch = 22, pt.bg = fills,
            col = "black", legend = names.shock,
            xpd = TRUE, pt.cex = 1.2, cex = 1)
   }
