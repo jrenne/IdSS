@@ -97,7 +97,7 @@ sim.arma <- function(c, phi, theta, sigma, T, y.0, nb.sim = 1,
 
 #' Estimate an ARMAX Model by Conditional Gaussian Maximum Likelihood
 #'
-#' Fits an ARMA(`p`, `q`) model, optionally augmented with contemporaneous
+#' Fits an ARMA(`p`, `q`) model, optionally augmented with row-aligned
 #' exogenous regressors. Starting values are obtained from an autoregression and
 #' the conditional Gaussian likelihood is optimized numerically.
 #'
@@ -106,12 +106,20 @@ sim.arma <- function(c, phi, theta, sigma, T, y.0, nb.sim = 1,
 #' @param q Non-negative integer giving the moving-average order.
 #' @param X Optional numeric vector or matrix of exogenous regressors with one
 #'   row per observation in `Y`. The historical sentinel `NaN` denotes an ARMA
-#'   model without exogenous regressors.
+#'   model without exogenous regressors. Columns may contain contemporaneous
+#'   values, lags, leads, or any other regressors: their timing is not inferred
+#'   from their position in `X`.
+#' @param x_lags Optional non-negative integer vector recording the lag attached
+#'   to each column of `X`. This is descriptive metadata used to label and
+#'   interpret distributed-lag specifications; it does not shift `X`. When it
+#'   is omitted, no lag structure is assumed.
 #'
 #' @return A list with components `c`, `phi`, `theta`, `sigma`, and `beta` for
 #'   the estimated coefficients; `max.logl` for the maximized conditional
 #'   log-likelihood; `I` for the inverse observed Hessian; `st.dev` for the
-#'   associated standard errors; and `THETA` for the complete parameter vector.
+#'   associated standard errors; `THETA` for the complete parameter vector;
+#'   `coef.table` for a labelled coefficient table; and `xreg.names` and
+#'   `x.lags` for the exogenous-regressor metadata.
 #'
 #' @details The first element of `theta` is fixed at one. The likelihood is
 #'   conditional on zero pre-sample innovations. This routine is primarily
@@ -123,8 +131,12 @@ sim.arma <- function(c, phi, theta, sigma, T, y.0, nb.sim = 1,
 #' y <- as.numeric(sim.arma(0.2, 0.5, 1, 0.4, 80, 0))
 #' fit <- estim.armax(y, p = 1, q = 0)
 #' fit$phi
+#'
+#' x <- cbind(current = rnorm(80), lag3 = rnorm(80))
+#' fit_x <- estim.armax(y, p = 1, q = 0, X = x, x_lags = c(0, 3))
+#' fit_x$coef.table
 #' @export
-estim.armax <- function(Y, p, q, X = NaN) {
+estim.armax <- function(Y, p, q, X = NaN, x_lags = NULL) {
   if (!is.numeric(Y) || anyNA(Y) || length(Y) <= p) {
     stop("`Y` must be a complete numeric vector longer than `p`.", call. = FALSE)
   }
@@ -138,6 +150,29 @@ estim.armax <- function(Y, p, q, X = NaN) {
   if (has_x) {
     X <- as.matrix(X)
     if (nrow(X) != T) stop("`X` must have one row per observation in `Y`.")
+    if (!is.numeric(X) || anyNA(X)) {
+      stop("`X` must be a complete numeric matrix.", call. = FALSE)
+    }
+    xreg.names <- colnames(X)
+    if (is.null(xreg.names)) xreg.names <- paste0("x", seq_len(ncol(X)))
+    blank_names <- !nzchar(xreg.names)
+    xreg.names[blank_names] <- paste0("x", which(blank_names))
+    xreg.names <- make.unique(xreg.names)
+    colnames(X) <- xreg.names
+    if (!is.null(x_lags)) {
+      if (!is.numeric(x_lags) || length(x_lags) != ncol(X) ||
+          anyNA(x_lags) || any(x_lags < 0) || any(x_lags != as.integer(x_lags))) {
+        stop("`x_lags` must contain one non-negative integer per column of `X`.",
+             call. = FALSE)
+      }
+      x_lags <- as.integer(x_lags)
+      names(x_lags) <- xreg.names
+    }
+  } else {
+    if (!is.null(x_lags)) {
+      stop("`x_lags` can only be supplied when `X` is supplied.", call. = FALSE)
+    }
+    xreg.names <- character(0)
   }
 
   if (p >= 1) {
@@ -190,9 +225,31 @@ estim.armax <- function(Y, p, q, X = NaN) {
   sigma <- abs(THETA[p + q + 2])
   beta <- if (has_x) tail(THETA, ncol(X)) else NULL
 
+  parameter.names <- c(
+    "(Intercept)",
+    if (p > 0) paste0("AR(", seq_len(p), ")"),
+    if (q > 0) paste0("MA(", seq_len(q), ")"),
+    "Innovation SD",
+    xreg.names
+  )
+  names(THETA) <- parameter.names
+  names(st.dev) <- parameter.names
+  dimnames(information_inverse) <- list(parameter.names, parameter.names)
+  if (p > 0) names(phi) <- paste0("AR(", seq_len(p), ")")
+  if (q > 0) names(theta) <- c("MA(0)", paste0("MA(", seq_len(q), ")"))
+  if (has_x) names(beta) <- xreg.names
+  displayed.estimates <- THETA
+  displayed.estimates["Innovation SD"] <- sigma
+  coef.table <- cbind(
+    Estimate = displayed.estimates,
+    `Std. Error` = st.dev,
+    `t value` = displayed.estimates / st.dev
+  )
+
   list(c = intercept, phi = phi, theta = theta, sigma = sigma, beta = beta,
        max.logl = -result$value, I = information_inverse,
-       st.dev = st.dev, THETA = THETA)
+       st.dev = st.dev, THETA = THETA, coef.table = coef.table,
+       xreg.names = xreg.names, x.lags = x_lags)
 }
 
 #' Evaluate an ARCH/GARCH Conditional Variance Recursion

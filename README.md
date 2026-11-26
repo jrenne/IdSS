@@ -13,9 +13,13 @@ non-Gaussian independent components.
 
 ## Installation
 
+The v0.2.1 tag is the release target. Before publication, install the checked
+source archive supplied with the companion books instead of this GitHub command.
+
+
 ```r
 install.packages("remotes")
-remotes::install_github("jrenne/IdSS")
+remotes::install_github("jrenne/IdSS", ref = "v0.2.1")
 library(IdSS)
 ```
 

@@ -51,9 +51,22 @@ test_that("ARMAX fitting returns the documented components", {
   y <- as.numeric(sim.arma(0.1, 0.4, 1, 0.5, 80, 0))
   fit <- estim.armax(y, 1, 0)
   expect_named(fit, c("c", "phi", "theta", "sigma", "beta", "max.logl",
-                      "I", "st.dev", "THETA"))
+                      "I", "st.dev", "THETA", "coef.table", "xreg.names",
+                      "x.lags"))
   expect_length(fit$phi, 1)
   expect_gt(abs(fit$sigma), 0)
+})
+
+test_that("ARMAX exogenous-regressor timing is explicit rather than inferred", {
+  set.seed(14)
+  x <- cbind(`shock t-6` = rnorm(100), `control t` = rnorm(100))
+  y <- 0.3 * x[, 1] - 0.2 * x[, 2] + rnorm(100, sd = 0.2)
+  fit <- estim.armax(y, 0, 0, X = x, x_lags = c(6, 0))
+
+  expect_identical(fit$xreg.names, colnames(x))
+  expect_equal(unname(fit$x.lags), c(6L, 0L))
+  expect_identical(names(fit$beta), colnames(x))
+  expect_true(all(colnames(x) %in% rownames(fit$coef.table)))
 })
 
 test_that("GARCH recursion returns a positive conditional variance", {

@@ -4,7 +4,7 @@
 \alias{estim.armax}
 \title{Estimate an ARMAX Model by Conditional Gaussian Maximum Likelihood}
 \usage{
-estim.armax(Y, p, q, X = NaN)
+estim.armax(Y, p, q, X = NaN, x_lags = NULL)
 }
 \arguments{
 \item{Y}{Numeric vector containing the dependent time series.}
@@ -15,16 +15,25 @@ estim.armax(Y, p, q, X = NaN)
 
 \item{X}{Optional numeric vector or matrix of exogenous regressors with one
 row per observation in `Y`. The historical sentinel `NaN` denotes an ARMA
-model without exogenous regressors.}
+model without exogenous regressors. Columns may contain contemporaneous
+values, lags, leads, or any other regressors: their timing is not inferred
+from their position in `X`.}
+
+\item{x_lags}{Optional non-negative integer vector recording the lag attached
+to each column of `X`. This is descriptive metadata used to label and
+interpret distributed-lag specifications; it does not shift `X`. When it
+is omitted, no lag structure is assumed.}
 }
 \value{
 A list with components `c`, `phi`, `theta`, `sigma`, and `beta` for
   the estimated coefficients; `max.logl` for the maximized conditional
   log-likelihood; `I` for the inverse observed Hessian; `st.dev` for the
-  associated standard errors; and `THETA` for the complete parameter vector.
+  associated standard errors; `THETA` for the complete parameter vector;
+  `coef.table` for a labelled coefficient table; and `xreg.names` and
+  `x.lags` for the exogenous-regressor metadata.
 }
 \description{
-Fits an ARMA(`p`, `q`) model, optionally augmented with contemporaneous
+Fits an ARMA(`p`, `q`) model, optionally augmented with row-aligned
 exogenous regressors. Starting values are obtained from an autoregression and
 the conditional Gaussian likelihood is optimized numerically.
 }
@@ -39,4 +48,8 @@ set.seed(42)
 y <- as.numeric(sim.arma(0.2, 0.5, 1, 0.4, 80, 0))
 fit <- estim.armax(y, p = 1, q = 0)
 fit$phi
+
+x <- cbind(current = rnorm(80), lag3 = rnorm(80))
+fit_x <- estim.armax(y, p = 1, q = 0, X = x, x_lags = c(0, 3))
+fit_x$coef.table
 }
