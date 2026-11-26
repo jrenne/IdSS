@@ -27,3 +27,14 @@ We must have that the number of variables is equal to the number of shocks. Henc
 IRFs has 4 dimensions. If there is only one draw (e.g. estimated model)
 , then IRFs has only 3 dimensions.
 }
+\examples{
+# A two-variable model with two independent structural shocks.
+B <- matrix(c(1, 0.3, 0.2, 1), nrow = 2)
+IRFs <- array(0, dim = c(2, 2, 6))
+for (h in 1:6) IRFs[, , h] <- diag(c(0.6, 0.4)^(h - 1)) \%*\% B
+decomposition <- variance.decomp(IRFs)
+# Shares of variable 1's forecast-error variance at the final horizon.
+shares <- decomposition$vardecomp[1, 1, 6, ]
+shares
+sum(shares)  # the two shock contributions sum to one
+}

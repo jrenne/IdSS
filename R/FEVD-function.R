@@ -38,6 +38,17 @@
 #'   \item{CI.lower.bounds}{Array of lower pointwise quantiles.}
 #'   \item{CI.upper.bounds}{Array of upper pointwise quantiles.}
 #' }
+#' @examples
+#' set.seed(123)
+#' Y <- cbind(output = rnorm(160), inflation = rnorm(160))
+#' # Identify the shock explaining most of output's FEV over horizons 1 to 4.
+#' # One replication requests point estimates, without bootstrap inference.
+#' fit <- svar.fevmax(Y, p = 1, nb.shocks = 1,
+#'                   names.of.shocks = "Output shock", H1 = 1, H2 = 4,
+#'                   variable = 1, norm = 1, nb.periods.IRF = 8,
+#'                   bootstrap.replications = 1, indic.plot = 0)
+#' dim(fit$simulated.IRFs)
+#' fit$simulated.IRFs[, 1, 1, 1]  # impact responses to the identified shock
 #' @export
 svar.fevmax <- function(Y,p,
                         nb.shocks,

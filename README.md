@@ -13,13 +13,11 @@ non-Gaussian independent components.
 
 ## Installation
 
-The v0.2.1 tag is the release target. Before publication, install the checked
-source archive supplied with the companion books instead of this GitHub command.
-
+Install the checked, tagged release:
 
 ```r
 install.packages("remotes")
-remotes::install_github("jrenne/IdSS", ref = "v0.2.1")
+remotes::install_github("jrenne/IdSS", ref = "v0.2.2")
 library(IdSS)
 ```
 
@@ -59,3 +57,10 @@ devtools::check()
 
 Changes to the public API are additionally validated by rendering both companion
 books against the candidate package version.
+
+## Executable help examples
+
+Every public function has a standalone example. After installing IdSS, run
+`Rscript --vanilla inst/validation/check-help-examples.R` from the source
+repository to execute each example in a separate fresh R session. CI runs
+this audit as well as the ordinary R package examples and gradient checks.

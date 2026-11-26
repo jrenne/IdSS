@@ -24,6 +24,18 @@ rotation in a structural VAR. It is exposed because the Identification
 course uses it directly with [stats::optim()]. Most users will normally
 call [estim.SVAR.ICA()] instead.
 }
+\examples{
+set.seed(123)
+errors <- cbind(rt(160, df = 5), rt(160, df = 7))
+# Center and whiten the two series before evaluating an ICA rotation.
+Y <- scale(errors, center = TRUE, scale = FALSE) \%*\% solve(chol(cov(errors)))
+distri <- list(type = c("student", "student"), df = c(5, 7))
+objective <- func.2.minimize(theta = 0.1, Y = Y, distri = distri)
+objective
+fit <- optim(0, func.2.minimize, gr = d.func.2.minimize,
+             Y = Y, distri = distri, method = "BFGS")
+fit$convergence
+}
 \seealso{
 [d.func.2.minimize()], [estim.SVAR.ICA()]
 }

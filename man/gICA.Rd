@@ -16,11 +16,13 @@ gICA(eps, distri, indic.deriv = 0)
 value requests the corresponding derivative contribution.}
 }
 \value{
-A numeric matrix with the same dimensions as `eps`.
+A list containing `log.L`, a matrix with the dimensions of `eps`,
+and `d.log.L` and `d2.log.L`, the corresponding derivative matrices.
+The derivative components are `NULL` when `indic.deriv = 0`.
 }
 \description{
-Evaluates the component-wise score contribution used by the package's
-independent-component pseudo-likelihood.
+Evaluates marginal log pseudo-densities and, optionally, their first two
+derivatives with respect to the residuals.
 }
 \examples{
 eps <- matrix(rnorm(20), 10, 2)

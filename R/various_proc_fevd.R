@@ -16,6 +16,16 @@
 #' \item{Variance}{Array where Variance(i,j,h,k) is the forecast error covariance
 #' between variable i and j for IRF draw k at horizon h (if i=j then it's the variance of i).}
 #' \item{vardecomp}{Array where vardecomp(i,j,h,k,l) = variance(i,j,h,k,l)/Variance(i,j,h,k).}
+#' @examples
+#' # A two-variable model with two independent structural shocks.
+#' B <- matrix(c(1, 0.3, 0.2, 1), nrow = 2)
+#' IRFs <- array(0, dim = c(2, 2, 6))
+#' for (h in 1:6) IRFs[, , h] <- diag(c(0.6, 0.4)^(h - 1)) %*% B
+#' decomposition <- variance.decomp(IRFs)
+#' # Shares of variable 1's forecast-error variance at the final horizon.
+#' shares <- decomposition$vardecomp[1, 1, 6, ]
+#' shares
+#' sum(shares)  # the two shock contributions sum to one
 #' @export
 variance.decomp <- function(IRFs){
   # This functions computes the variance decomposition associated to a set

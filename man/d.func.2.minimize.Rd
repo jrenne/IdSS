@@ -22,6 +22,22 @@ A numeric vector with the same length as `theta`.
 Computes the gradient of [func.2.minimize()] with respect to the free ICA
 parameters. It can be supplied as the `gr` argument of [stats::optim()].
 }
+\examples{
+set.seed(123)
+errors <- cbind(rt(160, df = 5), rt(160, df = 7))
+# Center and whiten the two series before evaluating an ICA rotation.
+Y <- scale(errors, center = TRUE, scale = FALSE) \%*\% solve(chol(cov(errors)))
+distri <- list(type = c("student", "student"), df = c(5, 7))
+theta <- 0.1
+gradient <- d.func.2.minimize(theta, Y, distri)
+# Compare the analytic gradient with a central finite difference.
+h <- 1e-6
+finite_difference <- (func.2.minimize(theta + h, Y, distri) -
+                      func.2.minimize(theta - h, Y, distri)) / (2 * h)
+c(analytic = unname(gradient), finite_difference = finite_difference)
+stopifnot(isTRUE(all.equal(unname(gradient), finite_difference,
+                           tolerance = 1e-5)))
+}
 \seealso{
 [func.2.minimize()], [estim.SVAR.ICA()]
 }

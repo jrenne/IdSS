@@ -13,9 +13,9 @@
 #' @param endog.var A \eqn{T \times n} numeric matrix of endogenous variables,
 #' ordered consistently with the VAR specification.
 #'
-#' @param distri A character string specifying the assumed distribution of
-#' the structural shocks. This argument is passed to the likelihood and score
-#' functions used in the ICA step (e.g. `"laplace"`, `"mixt.gaussian"`, etc.).
+#' @param distri A list specifying the marginal distributions of the
+#' structural shocks, as accepted by [simul.distri()] (for example,
+#' `list(type = c("student", "student"), df = c(5, 7))`).
 #'
 #' @param p An integer specifying the number of lags in the VAR model.
 #'
@@ -297,7 +297,10 @@ pseudo.log.L <- function(Y,AA,distri,indic.Jacobian=0){
   if(indic.Jacobian==0){
     Jacobian <- NULL
   }else{
-    aux1 <- (t(solve(I - A)) %x% (I + A)) %*% M
+    # C = (I + A) (I - A)^(-1) = 2 (I - A)^(-1) - I.
+    # Hence d vec(C) = 2 ((I-A)^(-T) %x% (I-A)^(-1)) M d theta.
+    inverse <- solve(I - A)
+    aux1 <- 2 * (t(inverse) %x% inverse) %*% M
     d.log.L <- g.eps$d.log.L # This is a T x n matrix
     aux2.1 <- matrix(1,1,n) %x% Y
     aux2.2 <- d.log.L %x% matrix(1,1,n)
@@ -316,15 +319,17 @@ pseudo.log.L.used <- function(AA,Y,distri){
 
 #' ICA Score Contributions
 #'
-#' Evaluates the component-wise score contribution used by the package's
-#' independent-component pseudo-likelihood.
+#' Evaluates marginal log pseudo-densities and, optionally, their first two
+#' derivatives with respect to the residuals.
 #'
 #' @param eps Numeric matrix whose rows are observations and columns are shocks.
 #' @param distri Distribution specification list accepted by
 #'   [simul.distri()].
 #' @param indic.deriv Integer flag. Zero returns score contributions; a non-zero
 #'   value requests the corresponding derivative contribution.
-#' @return A numeric matrix with the same dimensions as `eps`.
+#' @return A list containing `log.L`, a matrix with the dimensions of `eps`,
+#' and `d.log.L` and `d2.log.L`, the corresponding derivative matrices.
+#' The derivative components are `NULL` when `indic.deriv = 0`.
 #' @examples
 #' eps <- matrix(rnorm(20), 10, 2)
 #' distri <- list(type = c("gaussian", "gaussian"),
@@ -381,6 +386,17 @@ gICA <- function(eps,distri,indic.deriv=0){
 #'
 #' @return A numeric scalar equal to the negative pseudo-log-likelihood.
 #' @seealso [d.func.2.minimize()], [estim.SVAR.ICA()]
+#' @examples
+#' set.seed(123)
+#' errors <- cbind(rt(160, df = 5), rt(160, df = 7))
+#' # Center and whiten the two series before evaluating an ICA rotation.
+#' Y <- scale(errors, center = TRUE, scale = FALSE) %*% solve(chol(cov(errors)))
+#' distri <- list(type = c("student", "student"), df = c(5, 7))
+#' objective <- func.2.minimize(theta = 0.1, Y = Y, distri = distri)
+#' objective
+#' fit <- optim(0, func.2.minimize, gr = d.func.2.minimize,
+#'              Y = Y, distri = distri, method = "BFGS")
+#' fit$convergence
 #' @export
 func.2.minimize <- function(theta,Y,distri){
   aux <- pseudo.log.L(Y,theta,distri)
@@ -396,6 +412,21 @@ func.2.minimize <- function(theta,Y,distri){
 #'
 #' @return A numeric vector with the same length as `theta`.
 #' @seealso [func.2.minimize()], [estim.SVAR.ICA()]
+#' @examples
+#' set.seed(123)
+#' errors <- cbind(rt(160, df = 5), rt(160, df = 7))
+#' # Center and whiten the two series before evaluating an ICA rotation.
+#' Y <- scale(errors, center = TRUE, scale = FALSE) %*% solve(chol(cov(errors)))
+#' distri <- list(type = c("student", "student"), df = c(5, 7))
+#' theta <- 0.1
+#' gradient <- d.func.2.minimize(theta, Y, distri)
+#' # Compare the analytic gradient with a central finite difference.
+#' h <- 1e-6
+#' finite_difference <- (func.2.minimize(theta + h, Y, distri) -
+#'                       func.2.minimize(theta - h, Y, distri)) / (2 * h)
+#' c(analytic = unname(gradient), finite_difference = finite_difference)
+#' stopifnot(isTRUE(all.equal(unname(gradient), finite_difference,
+#'                            tolerance = 1e-5)))
 #' @export
 d.func.2.minimize <- function(theta,Y,distri){
   aux <- pseudo.log.L(Y,theta,distri,indic.Jacobian = 1)

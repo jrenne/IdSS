@@ -10,9 +10,9 @@ estim.SVAR.ICA(endog.var, distri, p)
 \item{endog.var}{A \eqn{T \times n} numeric matrix of endogenous variables,
 ordered consistently with the VAR specification.}
 
-\item{distri}{A character string specifying the assumed distribution of
-the structural shocks. This argument is passed to the likelihood and score
-functions used in the ICA step (e.g. `"laplace"`, `"mixt.gaussian"`, etc.).}
+\item{distri}{A list specifying the marginal distributions of the
+structural shocks, as accepted by [simul.distri()] (for example,
+`list(type = c("student", "student"), df = c(5, 7))`).}
 
 \item{p}{An integer specifying the number of lags in the VAR model.}
 }
