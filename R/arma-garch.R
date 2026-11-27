@@ -35,10 +35,14 @@
 #'
 #' @examples
 #' set.seed(123)
-#' paths <- sim.arma(c = 0, phi = 0.7, theta = 1, sigma = 1,
-#'                   T = 20, y.0 = 0, nb.sim = 2)
-#' irf <- sim.arma(c = 0, phi = 0.7, theta = 1, sigma = 1,
-#'                 T = 12, y.0 = 0, make.IRF = 1)
+#' paths <- sim.arma(
+#'   c = 0, phi = 0.7, theta = 1, sigma = 1,
+#'   T = 20, y.0 = 0, nb.sim = 2
+#' )
+#' irf <- sim.arma(
+#'   c = 0, phi = 0.7, theta = 1, sigma = 1,
+#'   T = 12, y.0 = 0, make.IRF = 1
+#' )
 #' @export
 sim.arma <- function(c, phi, theta, sigma, T, y.0, nb.sim = 1,
                      make.IRF = 0, X = NaN, beta = NaN) {
@@ -51,7 +55,7 @@ sim.arma <- function(c, phi, theta, sigma, T, y.0, nb.sim = 1,
     stop("`T` must be a positive integer.", call. = FALSE)
   }
   if (length(nb.sim) != 1L || !is.finite(nb.sim) || nb.sim < 1 ||
-      nb.sim != as.integer(nb.sim)) {
+    nb.sim != as.integer(nb.sim)) {
     stop("`nb.sim` must be a positive integer.", call. = FALSE)
   }
 
@@ -82,8 +86,10 @@ sim.arma <- function(c, phi, theta, sigma, T, y.0, nb.sim = 1,
 
   for (t in seq_len(T)) {
     if (q > 1) {
-      eps.t <- rbind(eps[t, ], matrix(eps.t[seq_len(q - 1), ],
-                                     q - 1, nb.sim))
+      eps.t <- rbind(eps[t, ], matrix(
+        eps.t[seq_len(q - 1), ],
+        q - 1, nb.sim
+      ))
     } else {
       eps.t <- matrix(eps[t, ], nrow = 1)
     }
@@ -161,9 +167,10 @@ estim.armax <- function(Y, p, q, X = NaN, x_lags = NULL) {
     colnames(X) <- xreg.names
     if (!is.null(x_lags)) {
       if (!is.numeric(x_lags) || length(x_lags) != ncol(X) ||
-          anyNA(x_lags) || any(x_lags < 0) || any(x_lags != as.integer(x_lags))) {
+        anyNA(x_lags) || any(x_lags < 0) || any(x_lags != as.integer(x_lags))) {
         stop("`x_lags` must contain one non-negative integer per column of `X`.",
-             call. = FALSE)
+          call. = FALSE
+        )
       }
       x_lags <- as.integer(x_lags)
       names(x_lags) <- xreg.names
@@ -203,21 +210,30 @@ estim.armax <- function(Y, p, q, X = NaN, x_lags = NULL) {
   maxit_nm <- 100 * length(THETA.0)
   result <- NULL
   for (i in seq_len(4)) {
-    result <- optim(par = THETA.0, fn = armax_objective,
-                    Y = Y, p = p, q = q, X = X,
-                    method = "Nelder-Mead", control = list(maxit = maxit_nm))
+    result <- optim(
+      par = THETA.0, fn = armax_objective,
+      Y = Y, p = p, q = q, X = X,
+      method = "Nelder-Mead", control = list(maxit = maxit_nm)
+    )
     THETA.0 <- result$par
-    result <- optim(par = THETA.0, fn = armax_objective,
-                    Y = Y, p = p, q = q, X = X,
-                    method = "BFGS", control = list(maxit = 10),
-                    hessian = i == 4)
+    result <- optim(
+      par = THETA.0, fn = armax_objective,
+      Y = Y, p = p, q = q, X = X,
+      method = "BFGS", control = list(maxit = 10),
+      hessian = i == 4
+    )
     THETA.0 <- result$par
   }
 
   THETA <- result$par
   information_inverse <- tryCatch(solve(result$hessian),
-                                  error = function(e) matrix(NA_real_,
-                                    length(THETA), length(THETA)))
+    error = function(e) {
+      matrix(
+        NA_real_,
+        length(THETA), length(THETA)
+      )
+    }
+  )
   st.dev <- sqrt(diag(information_inverse))
   intercept <- THETA[1]
   phi <- if (p > 0) THETA[seq_len(p) + 1] else numeric(0)
@@ -246,10 +262,12 @@ estim.armax <- function(Y, p, q, X = NaN, x_lags = NULL) {
     `t value` = displayed.estimates / st.dev
   )
 
-  list(c = intercept, phi = phi, theta = theta, sigma = sigma, beta = beta,
-       max.logl = -result$value, I = information_inverse,
-       st.dev = st.dev, THETA = THETA, coef.table = coef.table,
-       xreg.names = xreg.names, x.lags = x_lags)
+  list(
+    c = intercept, phi = phi, theta = theta, sigma = sigma, beta = beta,
+    max.logl = -result$value, I = information_inverse,
+    st.dev = st.dev, THETA = THETA, coef.table = coef.table,
+    xreg.names = xreg.names, x.lags = x_lags
+  )
 }
 
 #' Evaluate an ARCH/GARCH Conditional Variance Recursion
@@ -296,9 +314,11 @@ compute.garch <- function(theta, x, m0, r0) {
   kappa <- zeta * (1 - sum(delta))
   persistence <- sum(alpha) + sum(delta)
   if (!is.finite(kappa) || persistence >= 1) {
-    return(list(logf = 1e20 * max(persistence - 1, .Machine$double.eps),
-                h = rep(NaN, length(x)),
-                names.param = garch_parameter_names(m0, r0)))
+    return(list(
+      logf = 1e20 * max(persistence - 1, .Machine$double.eps),
+      h = rep(NaN, length(x)),
+      names.param = garch_parameter_names(m0, r0)
+    ))
   }
   Eu2 <- kappa / (1 - persistence)
   vec.u2 <- if (m0 > 0) x[p:(p - m0 + 1)]^2 else 0
@@ -316,8 +336,10 @@ compute.garch <- function(theta, x, m0, r0) {
   } else {
     logf <- -sum(-0.5 * log(2 * pi * h) - x[(p + 1):length(x)]^2 / (2 * h))
   }
-  list(logf = logf, h = c(rep(NaN, p), h),
-       names.param = garch_parameter_names(m0, r0))
+  list(
+    logf = logf, h = c(rep(NaN, p), h),
+    names.param = garch_parameter_names(m0, r0)
+  )
 }
 
 make_ar_companion <- function(phi) {
@@ -335,7 +357,9 @@ armax_objective <- function(THETA, Y, p, q, X = NaN) {
   sigma <- abs(THETA[p + q + 2])
   has_x <- !(length(X) == 1L && is.na(X[1]))
   beta <- if (has_x) tail(THETA, ncol(as.matrix(X))) else NULL
-  if (!is.finite(sigma) || sigma <= .Machine$double.eps) return(.Machine$double.xmax)
+  if (!is.finite(sigma) || sigma <= .Machine$double.eps) {
+    return(.Machine$double.xmax)
+  }
   residuals <- armax_residuals(Y, intercept, phi, theta, X, beta)
   -sum(-0.5 * log(2 * pi * sigma^2) - residuals^2 / (2 * sigma^2))
 }
@@ -351,17 +375,23 @@ armax_residuals <- function(Y, intercept, phi, theta, X = NaN, beta = NULL) {
     ar_lags <- if (p > 0 && t > 1) {
       available <- seq_len(min(p, t - 1))
       sum(phi[available] * Y[t - available])
-    } else 0
+    } else {
+      0
+    }
     ma_lags <- if (q > 0 && t > 1) {
       available <- seq_len(min(q, t - 1))
       sum(theta[available + 1] * eps[t - available])
-    } else 0
+    } else {
+      0
+    }
     eps[t] <- Y[t] - intercept - ar_lags - ma_lags - X.beta[t]
   }
   eps
 }
 
 garch_parameter_names <- function(m0, r0) {
-  c("zeta", if (m0 > 0) paste0("alpha", seq_len(m0)),
-    if (r0 > 0) paste0("delta", seq_len(r0)))
+  c(
+    "zeta", if (m0 > 0) paste0("alpha", seq_len(m0)),
+    if (r0 > 0) paste0("delta", seq_len(r0))
+  )
 }

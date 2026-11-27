@@ -15,15 +15,19 @@ kf_stationary_cov(F, Q)
 Symmetric state covariance matrix satisfying P = F P t(F) + Q.
 }
 \description{
-Solve the discrete Lyapunov equation for a stable state transition, including lower-rank state disturbance covariances.
+Solve the discrete Lyapunov equation for a stable state transition, including lower-rank
+  state disturbance covariances.
 }
 \details{
-The calculation solves the vectorized Lyapunov equation. It does not apply to random walks or local linear trends with unit roots. It supplies a covariance, not the stationary mean. For a transition intercept c, the stationary mean is solve(diag(nrow(F))-F,c).
+The calculation solves the vectorized Lyapunov equation. It does not apply to random
+  walks or local linear trends with unit roots. It supplies a covariance, not the stationary
+  mean. For a transition intercept c, the stationary mean is solve(diag(nrow(F))-F,c).
 }
 \examples{
-F <- diag(c(.8,.6));Q <- matrix(c(.2,.05,.05,.1),2)
-P <- kf_stationary_cov(F,Q)
-stopifnot(max(abs(P-F \%*\% P \%*\% t(F)-Q)) < 1e-10)
+F <- diag(c(.8, .6))
+Q <- matrix(c(.2, .05, .05, .1), 2)
+P <- kf_stationary_cov(F, Q)
+stopifnot(max(abs(P - F \%*\% P \%*\% t(F) - Q)) < 1e-10)
 }
 \seealso{
 Other Kalman state-space models: 

@@ -13,7 +13,6 @@
 #' @importFrom Matrix rankMatrix
 #' @importFrom stats arima coef cor embed lm na.omit optim qnorm quantile
 #'   residuals rnorm rt runif sd var
-#' @importFrom stringr str_replace
 #' @importFrom utils tail
 #' @importFrom vars Acoef Bcoef VAR
 "_PACKAGE"

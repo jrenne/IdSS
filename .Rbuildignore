@@ -4,3 +4,4 @@
 
 ^\.github$
 ^\.DS_Store$
+^CONTRIBUTING\.md$

@@ -65,8 +65,12 @@ The simulated model is
 }
 \examples{
 set.seed(123)
-paths <- sim.arma(c = 0, phi = 0.7, theta = 1, sigma = 1,
-                  T = 20, y.0 = 0, nb.sim = 2)
-irf <- sim.arma(c = 0, phi = 0.7, theta = 1, sigma = 1,
-                T = 12, y.0 = 0, make.IRF = 1)
+paths <- sim.arma(
+  c = 0, phi = 0.7, theta = 1, sigma = 1,
+  T = 20, y.0 = 0, nb.sim = 2
+)
+irf <- sim.arma(
+  c = 0, phi = 0.7, theta = 1, sigma = 1,
+  T = 12, y.0 = 0, make.IRF = 1
+)
 }

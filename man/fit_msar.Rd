@@ -18,11 +18,15 @@ fit_msar(
 )
 }
 \arguments{
-\item{y}{Finite numeric observation vector, with at least 30 entries and positive sample standard deviation.}
+\item{y}{Finite numeric observation vector, with at least 30 entries and positive sample
+standard deviation.}
 
-\item{ar}{Logical scalar. TRUE estimates a common AR(1) coefficient, conditions on the first observation and fits the remaining observations. FALSE fixes the AR coefficient at zero and fits every observation.}
+\item{ar}{Logical scalar. TRUE estimates a common AR(1) coefficient, conditions on the first
+observation and fits the remaining observations. FALSE fixes the AR coefficient at zero and
+fits every observation.}
 
-\item{switching_variance}{Logical scalar selecting two innovation variances rather than one common variance.}
+\item{switching_variance}{Logical scalar selecting two innovation variances rather than one
+common variance.}
 
 \item{zero_mean}{Logical scalar fixing both intercepts at zero; requires ar=FALSE.}
 
@@ -32,26 +36,41 @@ fit_msar(
 
 \item{tol}{Positive relative log-likelihood convergence tolerance.}
 
-\item{sd_floor}{Positive lower bound on each innovation standard deviation, smaller than the standard deviation of the fitted observations. NULL uses 0.1 times that standard deviation.}
+\item{sd_floor}{Positive lower bound on each innovation standard deviation, smaller than the
+standard deviation of the fitted observations. NULL uses 0.1 times that standard deviation.}
 
-\item{probability_floor}{Scalar strictly between zero and 0.5; all transition probabilities lie between this bound and its complement.}
+\item{probability_floor}{Scalar strictly between zero and 0.5; all transition probabilities
+lie between this bound and its complement.}
 
 \item{phi_bound}{Positive scalar below one bounding the absolute common AR coefficient.}
 }
 \value{
-The selected converged fit as returned by ms_filter, plus index (positions in the input y), converged, history, iterations, successful_starts, start_loglik, sd_floor, probability_floor, boundary, npar, aic and bic. The boundary flag indicates a fitted active constraint. start_loglik includes all starts, including starts that did not converge; the selected fit is the best converged start.
+The selected converged fit as returned by ms_filter, plus index (positions in the
+  input y), converged, history, iterations, successful_starts, start_loglik, sd_floor,
+  probability_floor, boundary, npar, aic and bic. The boundary flag indicates a fitted active
+  constraint. start_loglik includes all starts, including starts that did not converge; the
+  selected fit is the best converged start.
 }
 \description{
-Fit a two-regime Gaussian model with a common AR coefficient and common or regime-specific innovation variance, using constrained multistart EM or ECM.
+Fit a two-regime Gaussian model with a common AR coefficient and common or regime-specific
+  innovation variance, using constrained multistart EM or ECM.
 }
 \details{
-Initial state probabilities remain fixed at (0.5,0.5) in every iteration. Smoothed state and pair probabilities provide the EM weights. With switching variances, conditional maximizations update regression and variance blocks. The largest likelihood among converged starts is retained; no global-maximum guarantee or standard errors are provided. The default labels order intercepts increasingly, or variances increasingly for a zero-mean model. The explicit bounds prevent variance collapse and nearly empty regimes; inspect boundary before interpreting an estimate as an interior optimum. AIC/BIC use the same conditional sample and do not make regular chi-squared tests of the number of regimes valid.
+Initial state probabilities remain fixed at (0.5,0.5) in every iteration. Smoothed
+  state and pair probabilities provide the EM weights. With switching variances, conditional
+  maximizations update regression and variance blocks. The largest likelihood among converged
+  starts is retained; no global-maximum guarantee or standard errors are provided. The
+  default labels order intercepts increasingly, or variances increasingly for a zero-mean
+  model. The explicit bounds prevent variance collapse and nearly empty regimes; inspect
+  boundary before interpreting an estimate as an interior optimum. AIC/BIC use the same
+  conditional sample and do not make regular chi-squared tests of the number of regimes
+  valid.
 }
 \examples{
 set.seed(123)
-P <- matrix(c(.9,.1,.1,.9),2,byrow=TRUE)
-y <- ms_simulate(180,c(-1,1),c(.25,.25),c(.5,.5),P,burn=300)$y
-fit <- fit_msar(y,starts=2)
+P <- matrix(c(.9, .1, .1, .9), 2, byrow = TRUE)
+y <- ms_simulate(180, c(-1, 1), c(.25, .25), c(.5, .5), P, burn = 300)$y
+fit <- fit_msar(y, starts = 2)
 fit$c
 fit$P
 fit$boundary

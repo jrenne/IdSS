@@ -57,9 +57,14 @@ From the package directory:
 
 ```r
 roxygen2::roxygenise()
-devtools::test()
+library(IdSS)
+testthat::test_dir("tests/testthat", package = "IdSS",
+  load_package = "installed", stop_on_failure = TRUE)
 devtools::check()
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the source map, coding conventions
+and checks against an installed build.
 
 Changes to the public API are additionally validated by rendering both companion
 books against the candidate package version.

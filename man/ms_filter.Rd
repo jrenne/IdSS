@@ -7,37 +7,51 @@
 ms_filter(y, c, phi, sigma, P, y0 = 0, prior = NULL, smooth = TRUE)
 }
 \arguments{
-\item{y}{Nonempty finite numeric observation vector. Missing values are not supported by this routine.}
+\item{y}{Nonempty finite numeric observation vector. Missing values are not supported by this
+routine.}
 
-\item{c}{Numeric vector of regime-specific recursion intercepts, not unconditional regime means.}
+\item{c}{Numeric vector of regime-specific recursion intercepts, not unconditional regime
+means.}
 
 \item{phi}{Numeric vector of regime-specific AR(1) coefficients.}
 
 \item{sigma}{Positive numeric vector of regime innovation standard deviations.}
 
-\item{P}{Square row-stochastic transition matrix: P[i,j] is the probability of moving from state i to state j. Probability vectors are columns.}
+\item{P}{Square row-stochastic transition matrix: P[i,j] is the probability of moving from
+state i to state j. Probability vectors are columns.}
 
 \item{y0}{Finite pre-sample observation on which the likelihood conditions.}
 
-\item{prior}{Initial probabilities Pr(s[1] | y0). NULL uses uniform probabilities, held fixed for this call.}
+\item{prior}{Initial probabilities Pr(s[1] | y0). NULL uses uniform probabilities, held fixed
+for this call.}
 
 \item{smooth}{Logical scalar. If TRUE, also run the exact finite-state backward smoother.}
 }
 \value{
-A list containing loglik, per-observation increments, n-by-K predicted and filtered probability matrices, y, y0, c, phi, sigma, P and prior. With smooth=TRUE it also contains the n-by-K smoothed matrix and a K-by-K matrix of expected transition_counts over dates 2 through n.
+A list containing loglik, per-observation increments, n-by-K predicted and filtered
+  probability matrices, y, y0, c, phi, sigma, P and prior. With smooth=TRUE it also contains
+  the n-by-K smoothed matrix and a K-by-K matrix of expected transition_counts over dates 2
+  through n.
 }
 \description{
-Evaluate the conditional Gaussian likelihood and state probabilities of a finite-state Markov-switching AR(1), optionally using future observations for backward smoothing.
+Evaluate the conditional Gaussian likelihood and state probabilities of a finite-state
+  Markov-switching AR(1), optionally using future observations for backward smoothing.
 }
 \details{
-The observation equation is y[t] = c[s[t]] + phi[s[t]] * y[t-1] + sigma[s[t]] * z[t], where the z innovations are independent standard Gaussians and independent of the autonomous Markov chain. This is a switching-intercept model, not the switching-mean AR model whose density depends on lagged regimes. Computation uses logarithmic normalization. Zero transition probabilities are allowed. Smoothing conditions on the complete observed sample and fixed parameters; it is not available in real time. A stationary chain prior does not make a fixed y0 a draw from the joint stationary law.
+The observation equation is y[t] = c[s[t]] + phi[s[t]] * y[t-1] + sigma[s[t]] *
+  z[t], where the z innovations are independent standard Gaussians and independent of the
+  autonomous Markov chain. This is a switching-intercept model, not the switching-mean AR
+  model whose density depends on lagged regimes. Computation uses logarithmic normalization.
+  Zero transition probabilities are allowed. Smoothing conditions on the complete observed
+  sample and fixed parameters; it is not available in real time. A stationary chain prior
+  does not make a fixed y0 a draw from the joint stationary law.
 }
 \examples{
-P <- matrix(c(.9,.1,.2,.8),2,byrow=TRUE)
-f <- ms_filter(c(1,-1,.2),c(-1,1),c(0,0),c(1,1),P,prior=c(.5,.5))
+P <- matrix(c(.9, .1, .2, .8), 2, byrow = TRUE)
+f <- ms_filter(c(1, -1, .2), c(-1, 1), c(0, 0), c(1, 1), P, prior = c(.5, .5))
 f$filtered
 f$smoothed
-stopifnot(abs(sum(f$transition_counts)-2) < 1e-10)
+stopifnot(abs(sum(f$transition_counts) - 2) < 1e-10)
 }
 \seealso{
 Other Markov-switching models: 

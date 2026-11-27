@@ -10,18 +10,22 @@ ms_stationary(P)
 \item{P}{Finite square row-stochastic matrix.}
 }
 \value{
-Numeric column-probability vector q satisfying t(P) %*% q = q and sum(q) = 1; stored as an R vector.
+Numeric column-probability vector q satisfying t(P) %*% q = q and sum(q) = 1; stored
+  as an R vector.
 }
 \description{
-Compute the unique stationary distribution of a row-stochastic finite-state transition matrix.
+Compute the unique stationary distribution of a row-stochastic finite-state transition
+  matrix.
 }
 \details{
-Irreducibility is sufficient, but not necessary, for uniqueness. Periodicity does not prevent a unique stationary distribution. An error is raised if no unique solution exists. No initial distribution is imposed on a filter by calling this function.
+Irreducibility is sufficient, but not necessary, for uniqueness. Periodicity does
+  not prevent a unique stationary distribution. An error is raised if no unique solution
+  exists. No initial distribution is imposed on a filter by calling this function.
 }
 \examples{
-P <- matrix(c(.9,.1,.05,.95),2,byrow=TRUE)
+P <- matrix(c(.9, .1, .05, .95), 2, byrow = TRUE)
 q <- ms_stationary(P)
-stopifnot(max(abs(as.vector(t(P) \%*\% q)-q)) < 1e-12)
+stopifnot(max(abs(as.vector(t(P) \%*\% q) - q)) < 1e-12)
 }
 \seealso{
 Other Markov-switching models: 

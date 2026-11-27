@@ -32,7 +32,6 @@ Imports:
     MASS,
     Matrix,
     stats,
-    stringr,
     utils,
     vars
 Suggests:

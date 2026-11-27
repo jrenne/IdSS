@@ -9,32 +9,40 @@ ms_simulate(n, c, phi, sigma, P, burn = 1000L, y0 = 0)
 \arguments{
 \item{n}{Positive integer number of retained observations.}
 
-\item{c}{Numeric vector of regime-specific recursion intercepts, not unconditional regime means.}
+\item{c}{Numeric vector of regime-specific recursion intercepts, not unconditional regime
+means.}
 
 \item{phi}{Numeric vector of regime-specific AR(1) coefficients.}
 
 \item{sigma}{Positive numeric vector of regime innovation standard deviations.}
 
-\item{P}{Square row-stochastic transition matrix: P[i,j] is the probability of moving from state i to state j. Probability vectors are columns.}
+\item{P}{Square row-stochastic transition matrix: P[i,j] is the probability of moving from
+state i to state j. Probability vectors are columns.}
 
 \item{burn}{Non-negative integer number of observations discarded before retention.}
 
 \item{y0}{Finite scalar starting observation before burn-in.}
 }
 \value{
-A list containing the retained numeric y vector, integer state labels from 1 through K, and the observation y0 immediately preceding the retained sample.
+A list containing the retained numeric y vector, integer state labels from 1 through
+  K, and the observation y0 immediately preceding the retained sample.
 }
 \description{
-Simulate observations and their underlying finite-state regime sequence, with optional burn-in.
+Simulate observations and their underlying finite-state regime sequence, with optional
+  burn-in.
 }
 \details{
-The first simulated regime is drawn from the unique stationary distribution of P. The observation starts from the specified y0. A finite burn-in approximates stationary observation initialization in a stable model; it is not exact. Uniform contraction max(abs(phi)) < 1 is a sufficient finite-variance stability condition, but simulation does not impose it.
+The first simulated regime is drawn from the unique stationary distribution of P.
+  The observation starts from the specified y0. A finite burn-in approximates stationary
+  observation initialization in a stable model; it is not exact. Uniform contraction
+  max(abs(phi)) < 1 is a sufficient finite-variance stability condition, but simulation does
+  not impose it.
 }
 \examples{
 set.seed(123)
-P <- matrix(c(.9,.1,.05,.95),2,byrow=TRUE)
-x <- ms_simulate(100,c(-1,1),c(.3,.3),c(.5,.5),P,burn=200)
-plot(x$y,type="l",xlab="Time",ylab="Observation")
+P <- matrix(c(.9, .1, .05, .95), 2, byrow = TRUE)
+x <- ms_simulate(100, c(-1, 1), c(.3, .3), c(.5, .5), P, burn = 200)
+plot(x$y, type = "l", xlab = "Time", ylab = "Observation")
 table(x$state)
 }
 \seealso{

@@ -7,7 +7,8 @@
 kf_fit_local_level(y, a0 = 0, P0 = 1, variance_floor = 1e-06)
 }
 \arguments{
-\item{y}{Finite numeric observation vector with at least 20 entries; missing values are not supported by this estimator.}
+\item{y}{Finite numeric observation vector with at least 20 entries; missing values are not
+supported by this estimator.}
 
 \item{a0}{Finite scalar initial-state mean, before the first transition.}
 
@@ -16,20 +17,28 @@ kf_fit_local_level(y, a0 = 0, P0 = 1, variance_floor = 1e-06)
 \item{variance_floor}{Positive scalar lower bound on both variances.}
 }
 \value{
-A kf_filter result with smoothing, plus named variance and sd vectors (State and Measurement), converged, boundary, variance_floor and variance_upper. The best converged optimization is retained.
+A kf_filter result with smoothing, plus named variance and sd vectors (State and
+  Measurement), converged, boundary, variance_floor and variance_upper. The best converged
+  optimization is retained.
 }
 \description{
-Estimate state and measurement variances of a Gaussian local-level model using a fixed proper initial-state prior and three optimization starts.
+Estimate state and measurement variances of a Gaussian local-level model using a fixed proper
+  initial-state prior and three optimization starts.
 }
 \details{
-The model is alpha[t] = alpha[t-1] + eta[t], y[t] = alpha[t] + epsilon[t], with independent Gaussian disturbances. Log variances are optimized between the stated lower bound and max(100*var(diff(y)),100*variance_floor). The initial prior is held fixed in all evaluations. A boundary flag signals an active lower or upper constraint. No standard errors are reported. A local level has no stationary state distribution; a proper finite prior is distinct from an exact diffuse treatment.
+The model is alpha[t] = alpha[t-1] + eta[t], y[t] = alpha[t] + epsilon[t], with
+  independent Gaussian disturbances. Log variances are optimized between the stated lower
+  bound and max(100*var(diff(y)),100*variance_floor). The initial prior is held fixed in all
+  evaluations. A boundary flag signals an active lower or upper constraint. No standard
+  errors are reported. A local level has no stationary state distribution; a proper finite
+  prior is distinct from an exact diffuse treatment.
 }
 \examples{
 set.seed(123)
 n <- 100
-state <- cumsum(c(rnorm(1),rnorm(n,sd=.3)))
-y <- state[-1]+rnorm(n,sd=.6)
-f <- kf_fit_local_level(y,a0=0,P0=1)
+state <- cumsum(c(rnorm(1), rnorm(n, sd = .3)))
+y <- state[-1] + rnorm(n, sd = .6)
+f <- kf_fit_local_level(y, a0 = 0, P0 = 1)
 f$variance
 f$boundary
 stopifnot(f$converged)

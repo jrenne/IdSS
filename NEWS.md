@@ -1,3 +1,29 @@
+# IdSS (development version)
+
+- Organize source files by method and consistently format R code and examples.
+- Remove unused internal experiments and the unnecessary stringr dependency.
+- Replace the expanded Gaussian-mixture derivatives by posterior-weighted
+  component scores and curvature; preserve the public interface.
+- Share inference selection in recursive SVARs and use explicit type predicates.
+- Correct the sign-restriction help example layout and consolidate release notes.
+
+# IdSS 0.3.1
+
+Scientific review of the Structural Shocks companion course:
+- Correct LP normalization to a fixed impact innovation, use usable-sample
+  HAC scaling, and expose an optional HAC bandwidth for LP and LP-IV.
+- Correct sign/zero samplers: centered spherical draws, Haar QR signs, all
+  bootstrap replications, null-space ranks and separate inequality checks.
+  Return each shock's own summaries and report empty admissible sets clearly.
+- Retain early IRFs when maximizing FEV over windows beginning after step 1.
+- Reject invalid Monte Carlo covariance draws and complete the requested draws.
+- Use mean bootstrap bias, actual intercept vectors and linear stability
+  shrinkage for the bootstrap-after-bootstrap procedure.
+- Start plotted response horizons at impact zero; clarify single-draw FEVD
+  dimensions and use relevant instruments in the TSLS help example.
+- Clarify international macroeconomic data units.
+- No datasets, exports or new dependencies are added.
+
 # IdSS 0.3.0
 
 Adds ten documented public functions for latent-state models:

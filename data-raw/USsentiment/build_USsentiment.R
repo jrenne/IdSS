@@ -72,7 +72,8 @@ monthly$date0 <- as.Date(monthly$observation_date)
 monthly$year <- as.integer(format(monthly$date0, "%Y"))
 monthly$quarter <- (as.integer(format(monthly$date0, "%m")) - 1L) %/% 3L + 1L
 population <- stats::aggregate(CNP16OV ~ year + quarter, monthly, mean,
-                               na.rm = TRUE)
+  na.rm = TRUE
+)
 population$date <- qdate(population$year, population$quarter)
 
 macro <- merge(quarterly, population[, c("date", "CNP16OV")], by = "date")
@@ -99,16 +100,20 @@ macro$ln_consumption_pc <- cumsum(dlog_consumption_pc)
 # One-quarter-ahead Greenbook/Tealbook real-GDP-growth forecast. To obtain one
 # quarterly observation, use the publication closest to the 15th day of the
 # middle month of the quarter, which approximates the SPF survey timing.
-tealbook_files <- list.files(file.path(cache, "tealbook"), pattern = "[.]xlsx$",
-                             full.names = TRUE)
+tealbook_files <- list.files(file.path(cache, "tealbook"),
+  pattern = "[.]xlsx$",
+  full.names = TRUE
+)
 read_tealbook <- function(path) {
   x <- as.data.frame(readxl::read_excel(path), check.names = FALSE)
   names(x)[1] <- "target"
   x
 }
 tealbook_parts <- lapply(tealbook_files, read_tealbook)
-tealbook <- Reduce(function(x, y) merge(x, y, by = "target", all = TRUE),
-                   tealbook_parts)
+tealbook <- Reduce(
+  function(x, y) merge(x, y, by = "target", all = TRUE),
+  tealbook_parts
+)
 release_names <- names(tealbook)[-1]
 release_dates <- as.Date(sub("^gRGDP_", "", release_names), format = "%Y%m%d")
 release_quarters <- quarter_number(release_dates)
@@ -142,8 +147,10 @@ USsentiment <- Reduce(function(x, y) merge(x, y, by = "date"), list(
 USsentiment <- USsentiment[
   USsentiment$date >= as.Date("1968-12-15") &
     USsentiment$date <= as.Date("2010-09-15"),
-  c("date", "tfp", "ln_consumption_pc", "ln_gdp_pc", "ln_hours_pc",
-    "expectation")
+  c(
+    "date", "tfp", "ln_consumption_pc", "ln_gdp_pc", "ln_hours_pc",
+    "expectation"
+  )
 ]
 row.names(USsentiment) <- NULL
 

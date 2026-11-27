@@ -38,13 +38,17 @@ test_that("every installed dataset appears in the provenance register", {
 })
 
 test_that("ARMA simulation reproduces elementary impulse responses", {
-  irf <- sim.arma(c = 0, phi = 0.5, theta = 1, sigma = 1,
-                  T = 5, y.0 = 0, make.IRF = 1)
+  irf <- sim.arma(
+    c = 0, phi = 0.5, theta = 1, sigma = 1,
+    T = 5, y.0 = 0, make.IRF = 1
+  )
   expect_equal(as.numeric(irf), 0.5^(0:4), tolerance = 1e-12)
 
   set.seed(10)
-  paths <- sim.arma(c = 0, phi = 0.5, theta = 1, sigma = 1,
-                    T = 8, y.0 = 0, nb.sim = 3)
+  paths <- sim.arma(
+    c = 0, phi = 0.5, theta = 1, sigma = 1,
+    T = 8, y.0 = 0, nb.sim = 3
+  )
   expect_identical(dim(paths), c(8L, 3L))
 })
 
@@ -52,9 +56,11 @@ test_that("ARMAX fitting returns the documented components", {
   set.seed(11)
   y <- as.numeric(sim.arma(0.1, 0.4, 1, 0.5, 80, 0))
   fit <- estim.armax(y, 1, 0)
-  expect_named(fit, c("c", "phi", "theta", "sigma", "beta", "max.logl",
-                      "I", "st.dev", "THETA", "coef.table", "xreg.names",
-                      "x.lags"))
+  expect_named(fit, c(
+    "c", "phi", "theta", "sigma", "beta", "max.logl",
+    "I", "st.dev", "THETA", "coef.table", "xreg.names",
+    "x.lags"
+  ))
   expect_length(fit$phi, 1)
   expect_gt(abs(fit$sigma), 0)
 })
@@ -96,8 +102,10 @@ test_that("VARMA simulation accepts the historical Mu intercept alias", {
     C = diag(2),
     distri = list(type = c("gaussian", "gaussian"))
   )
-  result <- simul.VARMA(model, nb.sim = 5, Y0 = c(0, 0),
-                        eta0 = c(1, 0), indic.IRF = 1)
+  result <- simul.VARMA(model,
+    nb.sim = 5, Y0 = c(0, 0),
+    eta0 = c(1, 0), indic.IRF = 1
+  )
   expect_identical(dim(result$Y), c(2L, 5L))
   expect_equal(result$Y[, 1], c(1, 0))
 })
@@ -109,7 +117,8 @@ test_that("SVAR ordering accepts the historical bootstrap argument", {
   grDevices::pdf(tempfile(fileext = ".pdf"))
   on.exit(grDevices::dev.off(), add = TRUE)
   result <- svar.ordering(
-    y, p = 1, nb.periods.IRF = 3,
+    y,
+    p = 1, nb.periods.IRF = 3,
     nb.bootstrap.replications = 2, indic.plot = 0
   )
   expect_equal(dim(result$simulated.IRFs), c(3L, 2L, 2L))
@@ -121,7 +130,8 @@ test_that("every exported object has an installed help alias", {
   if (dir.exists(man_dir)) {
     rd_lines <- unlist(lapply(
       list.files(man_dir, pattern = "[.]Rd$", full.names = TRUE),
-      readLines, warn = FALSE
+      readLines,
+      warn = FALSE
     ))
     alias_lines <- grep("^\\\\alias\\{", rd_lines, value = TRUE)
     aliases <- sub("^\\\\alias\\{(.*)\\}$", "\\1", alias_lines)
@@ -133,5 +143,6 @@ test_that("every exported object has an installed help alias", {
   }
   names(documented) <- exports
   expect_true(all(documented), info = paste(names(documented)[!documented],
-                                            collapse = ", "))
+    collapse = ", "
+  ))
 })

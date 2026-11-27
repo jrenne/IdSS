@@ -20,13 +20,15 @@ ms_forecast_draws(
 
 \item{state_prob}{Numeric vector of filtered state probabilities at the origin.}
 
-\item{c}{Numeric vector of regime-specific recursion intercepts, not unconditional regime means.}
+\item{c}{Numeric vector of regime-specific recursion intercepts, not unconditional regime
+means.}
 
 \item{phi}{Numeric vector of regime-specific AR(1) coefficients.}
 
 \item{sigma}{Positive numeric vector of regime innovation standard deviations.}
 
-\item{P}{Square row-stochastic transition matrix: P[i,j] is the probability of moving from state i to state j. Probability vectors are columns.}
+\item{P}{Square row-stochastic transition matrix: P[i,j] is the probability of moving from
+state i to state j. Probability vectors are columns.}
 
 \item{horizon}{Positive integer number of future observations.}
 
@@ -36,17 +38,22 @@ ms_forecast_draws(
 Numeric matrix with draws rows and horizon columns; each row is one future path.
 }
 \description{
-Generate future observation paths conditional on a filtered two-state distribution and fixed model parameters.
+Generate future observation paths conditional on a filtered two-state distribution and fixed
+  model parameters.
 }
 \details{
-This simulator supports exactly two regimes. It first draws the current state from state_prob, transitions using P, and draws independent future Gaussian innovations. Quantiles at each horizon give pointwise mixture prediction intervals, not simultaneous path bands. Parameter-estimation uncertainty is not simulated.
+This simulator supports exactly two regimes. It first draws the current state from
+  state_prob, transitions using P, and draws independent future Gaussian innovations.
+  Quantiles at each horizon give pointwise mixture prediction intervals, not simultaneous
+  path bands. Parameter-estimation uncertainty is not simulated.
 }
 \examples{
 set.seed(123)
-P <- matrix(c(.9,.1,.05,.95),2,byrow=TRUE)
-x <- ms_forecast_draws(0,c(.4,.6),c(-1,1),c(.3,.3),c(.5,.5),P,
-                       horizon=4,draws=2000)
-apply(x,2,quantile,probs=c(.05,.5,.95))
+P <- matrix(c(.9, .1, .05, .95), 2, byrow = TRUE)
+x <- ms_forecast_draws(0, c(.4, .6), c(-1, 1), c(.3, .3), c(.5, .5), P,
+  horizon = 4, draws = 2000
+)
+apply(x, 2, quantile, probs = c(.05, .5, .95))
 }
 \seealso{
 Other Markov-switching models: 
