@@ -1,7 +1,7 @@
 Package: IdSS
 Type: Package
 Title: Identification and Analysis of Dynamic Structural Shocks
-Version: 0.2.2
+Version: 0.3.0
 Authors@R: c(
     person("Kenza", "Benhima", role = "aut"),
     person("Jean-Paul", "Renne", email = "jean-paul.renne@unil.ch",
@@ -13,7 +13,9 @@ Description: Teaching and research tools for time-series and structural
     error variance decompositions; and identifies structural shocks through
     recursive orderings, sign and zero restrictions, external instruments,
     forecast-error-variance maximization, and non-Gaussian independent
-    components. It also provides the documented datasets used by the companion
+    components. It includes Markov-switching simulation, filtering, smoothing,
+    estimation and forecasts, and linear Gaussian Kalman filtering, smoothing,
+    missing-observation likelihood and forecasts. It also provides the documented datasets used by the companion
     courses "Introduction to Time Series" and "The Identification of Dynamic
     Structural Shocks".
 License: MIT + file LICENSE

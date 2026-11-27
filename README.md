@@ -9,7 +9,9 @@ The package covers ARMA/ARMAX and ARCH/GARCH examples, VAR and VARMA
 simulation, impulse responses, forecast-error variance decompositions, local
 projections, and structural-shock identification through recursive orderings,
 sign and zero restrictions, external instruments, FEVD maximization, and
-non-Gaussian independent components.
+non-Gaussian independent components. It also provides Markov-switching
+simulation, filtering, smoothing, estimation and forecasting, and linear
+Gaussian Kalman filtering, RTS smoothing and observation forecasts.
 
 ## Installation
 
@@ -17,7 +19,7 @@ Install the checked, tagged release:
 
 ```r
 install.packages("remotes")
-remotes::install_github("jrenne/IdSS", ref = "v0.2.2")
+remotes::install_github("jrenne/IdSS", ref = "v0.3.0")
 library(IdSS)
 ```
 
@@ -28,6 +30,10 @@ help(package = "IdSS")
 ?sim.arma
 ?svar.ordering
 ?USmonthly
+?ms_filter
+?fit_msar
+?kf_filter
+?kf_forecast
 ```
 
 ## Data provenance and licences

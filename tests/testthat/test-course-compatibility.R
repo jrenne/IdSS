@@ -6,7 +6,9 @@ test_that("the public interface required by both books is exported", {
     "make.jorda.irf", "make.variance.decompo", "NW.LongRunVariance",
     "sim.arma", "simul.distri", "simul.VAR", "simul.VARMA",
     "svar.fevmax", "svar.iv", "svar.ordering", "svar.signs", "tsls",
-    "variance.decomp"
+    "variance.decomp", "ms_stationary", "ms_filter", "ms_simulate",
+    "fit_msar", "ms_forecast_moments", "ms_forecast_draws",
+    "kf_filter", "kf_stationary_cov", "kf_forecast", "kf_fit_local_level"
   )
   expect_setequal(getNamespaceExports("IdSS"), required)
 })
