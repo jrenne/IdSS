@@ -10,7 +10,8 @@ make.jorda.irf(
   nb.periods.IRF = 20,
   nb.lags.endog.var.4.control = 0,
   indic.plot = 1,
-  confidence.interval = 0.9
+  confidence.interval = 0.9,
+  hac.lag = NULL
 )
 }
 \arguments{
@@ -31,11 +32,15 @@ variables to include as controls in each local projection (default 0).}
 \item{confidence.interval}{A numeric value between 0 and 1 indicating the
 confidence level for bootstrap intervals (e.g. 0.90 for 90% intervals).
 Default is 0.90.}
+
+\item{hac.lag}{Optional non-negative integer for the Bartlett/Newey--West
+bandwidth. The default uses the larger of horizon plus one and
+floor(4*(N/100)^(2/9)), capped at N-1 usable observations.}
 }
 \value{
 A list with:
-\item{IRFs}{Numeric matrix \eqn{(H+1) \times n} of IRFs normalized by the
-  shock’s innovation standard deviation. Row \code{h+1} is horizon \code{h}.}
+\item{IRFs}{Numeric matrix \eqn{(H+1) \times n} of responses to a one-standard-deviation
+  impact innovation. Row \code{h+1} is horizon \code{h}.}
 \item{all.stdv.IRFs}{Numeric matrix \eqn{(H+1) \times n} of pointwise
   (Newey–West) standard errors corresponding to \code{IRFs}.}
 }
@@ -45,8 +50,16 @@ method. For each horizon \eqn{h = 0, \dots, H}, the routine runs a separate
 regression of \eqn{y_{i,t+h}} on the contemporaneous shock series (chosen by
 \code{posit.of.shock}) and optional lags of the endogenous variables, then
 stacks the coefficients across horizons. Pointwise standard errors are
-computed via a Newey–West estimator and responses are normalized by the
-innovation variance of the shock series.
+computed via a Newey–West estimator. Responses are multiplied by the
+standard deviation of the impact-date policy innovation, estimated once
+using the full impact regression and held fixed across horizons.
+}
+\details{
+The reported standard errors are pointwise normal approximations
+  under valid identifying moments, adequate controls, moment/CLT conditions
+  and a suitable HAC bandwidth. They are not weak-instrument robust or
+  simultaneous path bands. For `make.jorda.irf`, the estimated impact-shock
+  standard deviation is treated as fixed in the reported standard errors.
 }
 \examples{
 data("USmonthlyExample")

@@ -170,14 +170,14 @@ svar.ordering <- function(Y,p,
   if(indic.plot==1){
     par(mfrow=c(2,ifelse(round(n/2)==n/2,n/2,(n+1)/2)))
     for(i in 1:n){
-      plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="",
+      plot(seq_len(nb.periods.IRF)-1L,IRFs[,i],type="l",lwd=2,xlab="",ylab="",
            ylim=c(min(all.CI.lower.bounds[,i]),
                   max(all.CI.upper.bounds[,i])),
            main=paste0("(",letters[i],") ",names.of.variables[i]))
       abline(h=0,col="grey")
       if(inference>0){
-        lines(all.CI.lower.bounds[,i],col="grey45",lty=2,lwd=2)
-        lines(all.CI.upper.bounds[,i],col="grey45",lty=2,lwd=2)
+        lines(seq_len(nb.periods.IRF)-1L,all.CI.lower.bounds[,i],col="grey45",lty=2,lwd=2)
+        lines(seq_len(nb.periods.IRF)-1L,all.CI.upper.bounds[,i],col="grey45",lty=2,lwd=2)
       }
     }
   }
@@ -308,7 +308,7 @@ montecarlo <- function(Y,p,
   phi             <- distrib.phi.res$phi
   var.phi         <- distrib.phi.res$var.phi
   Phi.simul       <- list()
-  distrib.omega.res <- distrib.omega(Omega,n,T)
+  distrib.omega.res <- distrib.omega(Omega,n,nrow(resids))
   omega             <- distrib.omega.res$omega
   var.omega         <- distrib.omega.res$var.omega
   Omega.simul       <- array(0,c(n,n))
@@ -318,6 +318,7 @@ montecarlo <- function(Y,p,
   # Perform the simulations
   while(xx <nb.draws){
     i<-i+1
+    if (i > max(1000L,100L*nb.draws)) stop("Unable to obtain enough positive-definite covariance draws")
     # here draw B.hat
     omega.simul       <- mvrnorm(1, omega,var.omega)
     j <- 1
@@ -329,7 +330,7 @@ montecarlo <- function(Y,p,
     r <- eigen(Omega.simul) # use this if some Omega.simul are not positive definite
     eig <- r$values
     if (length(eig[eig>0])!=n){
-      break
+      next
     }else{
       xx<-xx+1
       # here draw Phi
@@ -536,7 +537,7 @@ bootstrap.after.bootstrap <- function(Y,p,
   B.hat <- baseline.res$B.hat
   cst <- Bcoef(est.VAR)[,p*n+1]
   resids <- residuals(est.VAR)
-  phi <- VEC.coef(Phi,c(n,0),n,p)
+  phi <- VEC.coef(Phi,cst,n,p)
 
 
   simulated.IRFs  <- replicate(nb.draws, IRFs, simplify="array")
@@ -574,26 +575,31 @@ bootstrap.after.bootstrap <- function(Y,p,
 
     simulated.est.VAR <- simulated.res$est.VAR
     simulated.Phi.temp <- Acoef(simulated.est.VAR)
-    simulated.phi[,i] <- VEC.coef(simulated.Phi.temp,c(n,1),n,p)
+    simulated.phi[,i] <- VEC.coef(simulated.Phi.temp,Bcoef(simulated.est.VAR)[,p*n+1],n,p)
   }
 
-  # Compute the bias
-  median.simulated.phi <- apply(simulated.phi,1,function(x){quantile(x,0.5)})
-  bias <- median.simulated.phi-phi
-  # Compute the unbiased Phi
-  delta <-1
-  for (l in 1:100){
-    unbiased.phi <- phi-bias
-    unbiased.Phi.temp <- t(matrix(unbiased.phi,ncol=n,nrow=1+n*p))
-    unbiased.Phi <- list()
-    for (j in 1:p){ unbiased.Phi[[j]] <- unbiased.Phi.temp[,(2+(j-1)*n):(1+j*n)]}
-    unbiased.PHI <- make.PHI(unbiased.Phi)
-    if (abs(eigen(unbiased.PHI)$values[1])<1){break}
-    else{
-      delta <- delta-0.01
-      bias <- bias*delta
-    }
+  # Estimated mean bias; intercept entries are not part of the stability check.
+  bias <- rowMeans(simulated.phi)-as.numeric(phi)
+  phi.list <- function(v) {
+    coefficients <- t(matrix(v,nrow=1+n*p,ncol=n))
+    lapply(seq_len(p),function(j) coefficients[,(2+(j-1)*n):(1+j*n),drop=FALSE])
   }
+  stable <- function(v) max(Mod(eigen(make.PHI(phi.list(v)),only.values=TRUE)$values)) < 1
+  shrink <- function(v,b) {
+    # No stationarity-based correction is applied to an unstable OLS draw.
+    if (!stable(v)) return(list(coef=v,bias=rep(0,length(b))))
+    for (weight in seq(1,0,by=-.01)) {
+      candidate <- v-weight*b
+      if (stable(candidate)) return(list(coef=candidate,bias=weight*b))
+    }
+    stop("Could not shrink the bias correction to a stable estimate")
+  }
+  if (!stable(phi)) stop("Bootstrap bias correction requires a stable fitted VAR")
+  corrected <- shrink(as.numeric(phi),bias)
+  bias <- corrected$bias
+  unbiased.Phi <- phi.list(corrected$coef)
+  fitted.mean <- solve(diag(n)-Reduce(`+`,Phi),cst)
+  corrected.cst <- (diag(n)-Reduce(`+`,unbiased.Phi))%*%fitted.mean
   # SECOND BOOTSTRAP
   # Perform the simulations
   for(i in 1:nb.draws){
@@ -601,7 +607,7 @@ bootstrap.after.bootstrap <- function(Y,p,
     simul.index <- sample(1:dim(resids)[1],dim(Y)[1],replace=TRUE)
     simul.residuals <- resids[simul.index,]
     # Simulate T observations
-    simulated.Y <- simul.VAR(cst,unbiased.Phi,B = diag(n),nb.sim=dim(Y)[1],y0.star,indic.IRF = 0,eta = simul.residuals)
+    simulated.Y <- simul.VAR(as.numeric(corrected.cst),unbiased.Phi,B = diag(n),nb.sim=dim(Y)[1],y0.star,indic.IRF = 0,eta = simul.residuals)
     colnames(simulated.Y) <- colnames(Y)
 
     # Estimate IRFs on simulated data for all shocks or just one
@@ -618,9 +624,9 @@ bootstrap.after.bootstrap <- function(Y,p,
     simulated.B.hat[,,i] <- simulated.res$B.hat
     simulated.est.VAR <- simulated.res$est.VAR
     simulated.Phi.temp <- Acoef(simulated.est.VAR)
-    simulated.phi <- VEC.coef(simulated.Phi.temp,c(n,1),n,p)
+    simulated.phi <- VEC.coef(simulated.Phi.temp,Bcoef(simulated.est.VAR)[,p*n+1],n,p)
     # Compute the unbiased Phi
-      unbiased.simulated.phi <- simulated.phi-bias
+      unbiased.simulated.phi <- shrink(as.numeric(simulated.phi),bias)$coef
       unbiased.simulated.Phi.temp <- t(matrix(unbiased.simulated.phi,ncol=n,nrow=1+n*p))
       unbiased.simulated.Phi <- list()
       for (j in 1:p){ unbiased.simulated.Phi[[j]] <- unbiased.simulated.Phi.temp[,(2+(j-1)*n):(1+j*n)]}

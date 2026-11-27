@@ -113,8 +113,8 @@ NW.LongRunVariance <- function(X,q){
 #' set.seed(123)
 #' T <- 200
 #'
-#' Z <- matrix(rnorm(T * 2), T, 2)
-#' X <- cbind(1, Z[,1] + 0.5 * rnorm(T))
+#' Z <- cbind(1, rnorm(T))
+#' X <- cbind(1, Z[,2] + 0.5 * rnorm(T))
 #' Y <- X %*% c(1, 2) + rnorm(T)
 #'
 #' res <- tsls(Y = as.matrix(Y), X = X, Z = Z, q = 4)
@@ -337,12 +337,12 @@ svar.iv <- function(Y,Z,p,
     for(i in 1:n){
       ylim <- if (is.null(all.CI.lower.bounds)) range(IRFs[,i]) else
         range(all.CI.lower.bounds[,i], all.CI.upper.bounds[,i])
-      plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="", ylim=ylim,
+      plot(seq_len(nb.periods.IRF)-1L,IRFs[,i],type="l",lwd=2,xlab="",ylab="", ylim=ylim,
            main=paste0("(",letters[i],") ",names.of.variables[i]))
       abline(h=0,col="grey")
       if (!is.null(all.CI.lower.bounds)) {
-        lines(all.CI.lower.bounds[,i],col="grey45",lty=2,lwd=2)
-        lines(all.CI.upper.bounds[,i],col="grey45",lty=2,lwd=2)
+        lines(seq_len(nb.periods.IRF)-1L,all.CI.lower.bounds[,i],col="grey45",lty=2,lwd=2)
+        lines(seq_len(nb.periods.IRF)-1L,all.CI.upper.bounds[,i],col="grey45",lty=2,lwd=2)
       }
     }
   }
@@ -633,8 +633,9 @@ svar.ordering.aux <- function(Y,p,
 #' regression of \eqn{y_{i,t+h}} on the contemporaneous shock series (chosen by
 #' \code{posit.of.shock}) and optional lags of the endogenous variables, then
 #' stacks the coefficients across horizons. Pointwise standard errors are
-#' computed via a Newey–West estimator and responses are normalized by the
-#' innovation variance of the shock series.
+#' computed via a Newey–West estimator. Responses are multiplied by the
+#' standard deviation of the impact-date policy innovation, estimated once
+#' using the full impact regression and held fixed across horizons.
 #'
 #'@param Y Numeric matrix of size \eqn{T \times n} containing the endogenous
 #'   variables (one column per variable). Column names are used for plot titles.
@@ -650,8 +651,8 @@ svar.ordering.aux <- function(Y,p,
 #' @param indic.plot Plots are displayed if = 1.
 #'
 #' @return A list with:
-#' \item{IRFs}{Numeric matrix \eqn{(H+1) \times n} of IRFs normalized by the
-#'   shock’s innovation standard deviation. Row \code{h+1} is horizon \code{h}.}
+#' \item{IRFs}{Numeric matrix \eqn{(H+1) \times n} of responses to a one-standard-deviation
+#'   impact innovation. Row \code{h+1} is horizon \code{h}.}
 #' \item{all.stdv.IRFs}{Numeric matrix \eqn{(H+1) \times n} of pointwise
 #'   (Newey–West) standard errors corresponding to \code{IRFs}.}
 #' @export
@@ -670,73 +671,93 @@ svar.ordering.aux <- function(Y,p,
 #'                             nb.periods.IRF = 12, nb.lags.endog.var.4.control=3,
 #'                           indic.plot = 1, # Plots are displayed if = 1.
 #'                           confidence.interval = 0.90)
+#' @param hac.lag Optional non-negative integer for the Bartlett/Newey--West
+#'   bandwidth. The default uses the larger of horizon plus one and
+#'   floor(4*(N/100)^(2/9)), capped at N-1 usable observations.
+#' @details The reported standard errors are pointwise normal approximations
+#'   under valid identifying moments, adequate controls, moment/CLT conditions
+#'   and a suitable HAC bandwidth. They are not weak-instrument robust or
+#'   simultaneous path bands. For `make.jorda.irf`, the estimated impact-shock
+#'   standard deviation is treated as fixed in the reported standard errors.
 #' @export
 make.jorda.irf <- function(Y,
                            posit.of.shock = 1,
                            nb.periods.IRF = 20,
-                           nb.lags.endog.var.4.control=0,
-                           indic.plot = 1, # Plots are displayed if = 1.
-                           confidence.interval = 0.90){
-  # This function implements Jorda's approach.
-
-  considered.variables <- colnames(Y)
-  T <- dim(Y)[1]
-  n <- dim(Y)[2]
-
-  mat.of.results <- matrix(NaN,nb.periods.IRF+1,n)
-  all.stdv.IRFs <- matrix(NaN,nb.periods.IRF+1,n)
-  for(h in 0:nb.periods.IRF){
-    message(paste("Jorda's approach, Currently working on horizon h=",toString(h),sep=""))
-    for(i in 1:n){
-      y.i.t.p.h <- Y[(h+1+nb.lags.endog.var.4.control):T,i]
-      X <- Y[(1+nb.lags.endog.var.4.control):(T-h),1:posit.of.shock]
-      if(nb.lags.endog.var.4.control>0){
-        for(k in 1:nb.lags.endog.var.4.control){
-          X <- cbind(X,Y[(1+nb.lags.endog.var.4.control-k):(T-h-k),])
-        }
-      }
-      X <- cbind(1,X)
-      b <- solve(t(X)%*%X) %*% t(X) %*% y.i.t.p.h
-      mat.of.results[h+1,i] <- b[posit.of.shock+1]
-
-      # Approximation of the covariance matrix of b (Newey-West):
-      Q <- T * solve(t(X) %*% X)
-      e <- y.i.t.p.h - X %*% b
-      X.times.eps <- X * matrix(e,dim(X)[1],dim(X)[2])
-      S <- NW.LongRunVariance(X.times.eps,h+1)
-      covmat.b <- 1/T * Q %*% S %*% t(Q)
-      all.stdv.IRFs[h+1,i] <- sqrt(covmat.b[posit.of.shock+1,posit.of.shock+1])
-
-      # Compute variance of the shock:
-      if(i==posit.of.shock){
-        variance.of.shock <- c(var(e))
-      }
+                           nb.lags.endog.var.4.control = 0,
+                           indic.plot = 1,
+                           confidence.interval = 0.90,
+                           hac.lag = NULL) {
+  Y <- .lp_input(Y, nb.periods.IRF, nb.lags.endog.var.4.control)
+  n <- ncol(Y); T <- nrow(Y); H <- nb.periods.IRF
+  p <- nb.lags.endog.var.4.control; k <- posit.of.shock
+  if (length(k) != 1L || !is.finite(k) || k != as.integer(k) || k < 1 || k > n)
+    stop("posit.of.shock must select one column of Y")
+  .lp_hac_lag(hac.lag, 0, T-p)
+  design <- function(h) {
+    dates <- seq.int(p+1L, T-h)
+    X <- cbind(1, Y[dates, seq_len(k), drop=FALSE])
+    if (p > 0) for (j in seq_len(p)) X <- cbind(X, Y[dates-j, , drop=FALSE])
+    list(X=X, dates=dates)
+  }
+  first <- design(0)
+  controls <- first$X[, -(k+1L), drop=FALSE]
+  innovation <- stats::lm.fit(controls, Y[first$dates,k])$residuals
+  shock.sd <- stats::sd(innovation)
+  if (!is.finite(shock.sd) || shock.sd <= 0) stop("The policy innovation has zero variance")
+  IRFs <- SE <- matrix(NA_real_, H+1L, n)
+  for (h in 0:H) {
+    message("Jorda's approach, Currently working on horizon h=", h)
+    d <- design(h); X <- d$X; N <- nrow(X)
+    if (N <= ncol(X) || qr(X)$rank < ncol(X)) stop("Insufficient observations or collinear LP controls")
+    inverse <- solve(crossprod(X))
+    for (i in seq_len(n)) {
+      outcome <- Y[d$dates+h,i]
+      b <- inverse %*% crossprod(X,outcome)
+      e <- as.numeric(outcome-X%*%b)
+      scores <- X*e
+      S <- NW.LongRunVariance(scores, .lp_hac_lag(hac.lag,h,N))
+      V <- N*inverse%*%S%*%inverse
+      IRFs[h+1L,i] <- b[k+1L]*shock.sd
+      SE[h+1L,i] <- sqrt(max(0,V[k+1L,k+1L]))*shock.sd
     }
   }
-  IRFs <- mat.of.results / sqrt(variance.of.shock)
-  all.stdv.IRFs <- all.stdv.IRFs / sqrt(variance.of.shock)
+  if (indic.plot == 1) .lp_plot(IRFs,SE,colnames(Y),confidence.interval)
+  list(IRFs=IRFs, all.stdv.IRFs=SE)
+}
 
-  if(indic.plot==1){
-    par(mfrow=c(2,
-                ifelse(round(n/2)==n/2,n/2,(n+1)/2)))
-    for(i in 1:n){
-      lower.bound <- IRFs[,i] + qnorm((1-confidence.interval)/2) * all.stdv.IRFs[,i]
-      upper.bound <- IRFs[,i] + qnorm(1-(1-confidence.interval)/2) * all.stdv.IRFs[,i]
-      plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="",
-           ylim=c(min(lower.bound),max(upper.bound)),
-           main=paste0("(",letters[i],") ",considered.variables[i]))
-      abline(h=0,col="grey")
-      lines(lower.bound,col="grey45",lty=2,lwd=2)
-      lines(upper.bound,col="grey45",lty=2,lwd=2)
-    }
+#' @keywords internal
+#' @noRd
+.lp_input <- function(Y,H,p) {
+  if (!is.matrix(Y) || !is.numeric(Y) || any(!is.finite(Y))) stop("Y must be a finite numeric matrix")
+  if (length(H)!=1L || !is.finite(H) || H<0 || H!=as.integer(H) ||
+      length(p)!=1L || !is.finite(p) || p<0 || p!=as.integer(p)) stop("Horizons and lag counts must be non-negative integers")
+  if (nrow(Y)-p-H<3L || ncol(Y)<1L) stop("Insufficient observations for the requested horizons and lags")
+  Y
+}
+
+#' @keywords internal
+#' @noRd
+.lp_hac_lag <- function(q,h,N) {
+  if (is.null(q)) return(min(N-1L,max(h+1L,floor(4*(N/100)^(2/9)))))
+  if (length(q)!=1L || !is.finite(q) || q<0 || q!=as.integer(q)) stop("hac.lag must be NULL or a non-negative integer")
+  min(q,N-1L)
+}
+
+#' @keywords internal
+#' @noRd
+.lp_plot <- function(IRFs,SE,labels,confidence.interval) {
+  n <- ncol(IRFs);H <- nrow(IRFs)-1L
+  if (is.null(labels)) labels <- paste("Variable",seq_len(n))
+  par(mfrow=c(2,ceiling(n/2)))
+  critical <- stats::qnorm((1+confidence.interval)/2)
+  for (i in seq_len(n)) {
+    lo <- IRFs[,i]-critical*SE[,i];hi <- IRFs[,i]+critical*SE[,i]
+    plot(0:H,IRFs[,i],type="l",lwd=2,xlab="Horizon",ylab="",
+         ylim=range(c(lo,hi)),main=paste0("(",letters[i],") ",labels[i]))
+    abline(h=0,col="grey")
+    lines(0:H,lo,col="grey45",lty=2,lwd=2)
+    lines(0:H,hi,col="grey45",lty=2,lwd=2)
   }
-
-  return(
-    list(
-      IRFs = IRFs,
-      all.stdv.IRFs = all.stdv.IRFs
-    )
-  )
 }
 
 #' Local Projection IV impulse response functions (LP-IV)
@@ -815,6 +836,14 @@ make.jorda.irf <- function(Y,
 #'                            indic.plot = 1, # Plots are displayed if = 1.
 #'                            confidence.interval = 0.90)
 #'
+#' @param hac.lag Optional non-negative integer for the Bartlett/Newey--West
+#'   bandwidth. The default uses the larger of horizon plus one and
+#'   floor(4*(N/100)^(2/9)), capped at N-1 usable observations.
+#' @details The reported standard errors are pointwise normal approximations
+#'   under valid identifying moments, adequate controls, moment/CLT conditions
+#'   and a suitable HAC bandwidth. They are not weak-instrument robust or
+#'   simultaneous path bands. For `make.jorda.irf`, the estimated impact-shock
+#'   standard deviation is treated as fixed in the reported standard errors.
 #' @export
 make.LPIV.irf <- function(Y,Z,
                           #posit.of.shock = 1,
@@ -822,11 +851,15 @@ make.LPIV.irf <- function(Y,Z,
                           nb.lags.Y.4.control=0,
                           nb.lags.Z.4.control=0,
                           indic.plot = 1, # Plots are displayed if = 1.
-                          confidence.interval = 0.90){
+                          confidence.interval = 0.90,
+                          hac.lag = NULL){
   # This function implements the LP-IV approach.
   # By convention, the shock has a unit effect on the first component of Y
   # Z is the instrumental variable.
 
+  Y <- .lp_input(Y, nb.periods.IRF, max(nb.lags.Y.4.control,nb.lags.Z.4.control))
+  if (!is.matrix(Z) || !is.numeric(Z) || nrow(Z)!=nrow(Y) || any(!is.finite(Z))) stop("Z must be a finite numeric matrix with the same rows as Y")
+  .lp_hac_lag(hac.lag,0,nrow(Y))
   considered.variables <- colnames(Y)
   T <- dim(Y)[1]
   n <- dim(Y)[2]
@@ -858,26 +891,13 @@ make.LPIV.irf <- function(Y,Z,
       }
       X  <- cbind(1,X) # add a constant in the regression
       ZZ <- cbind(ZZ,1) # add a constant in the regression
-      res.iv.est <- tsls(y.i.t.p.h,X,ZZ,h+1)
+      res.iv.est <- tsls(y.i.t.p.h,X,ZZ,.lp_hac_lag(hac.lag,h,nrow(X)))
       IRFs[h+1,i] <- res.iv.est$b.iv[2] # Note: res.iv.est$b.iv[1] corresponds to the constant
-      all.stdv.IRFs[h+1,i] <- sqrt(res.iv.est$covmat.b.iv[2,2])
+      all.stdv.IRFs[h+1,i] <- sqrt(max(0,res.iv.est$covmat.b.iv[2,2]))
     }
   }
 
-  if(indic.plot==1){
-    par(mfrow=c(2,
-                ifelse(round(n/2)==n/2,n/2,(n+1)/2)))
-    for(i in 1:n){
-      lower.bound <- IRFs[,i] + qnorm((1-confidence.interval)/2) * all.stdv.IRFs[,i]
-      upper.bound <- IRFs[,i] + qnorm(1-(1-confidence.interval)/2) * all.stdv.IRFs[,i]
-      plot(IRFs[,i],type="l",lwd=2,xlab="",ylab="",
-           ylim=c(min(lower.bound),max(upper.bound)),
-           main=paste0("(",letters[i],") ",considered.variables[i]))
-      abline(h=0,col="grey")
-      lines(lower.bound,col="grey45",lty=2,lwd=2)
-      lines(upper.bound,col="grey45",lty=2,lwd=2)
-    }
-  }
+  if (indic.plot==1) .lp_plot(IRFs,all.stdv.IRFs,considered.variables,confidence.interval)
 
   return(
     list(

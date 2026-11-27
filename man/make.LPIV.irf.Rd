@@ -11,7 +11,8 @@ make.LPIV.irf(
   nb.lags.Y.4.control = 0,
   nb.lags.Z.4.control = 0,
   indic.plot = 1,
-  confidence.interval = 0.9
+  confidence.interval = 0.9,
+  hac.lag = NULL
 )
 }
 \arguments{
@@ -36,6 +37,10 @@ with confidence intervals are plotted.}
 
 \item{confidence.interval}{Numeric scalar in \eqn{(0,1)} specifying the
 confidence level used to construct pointwise confidence intervals.}
+
+\item{hac.lag}{Optional non-negative integer for the Bartlett/Newey--West
+bandwidth. The default uses the larger of horizon plus one and
+floor(4*(N/100)^(2/9)), capped at N-1 usable observations.}
 }
 \value{
 A list with components:
@@ -75,6 +80,12 @@ The coefficient \eqn{\beta_{i,h}} is interpreted as the impulse response of
 variable \eqn{i} at horizon \eqn{h}. Standard errors are obtained from the
 HAC-corrected covariance matrix returned by \code{\link{tsls}}, using a
 Newey–West lag length of \code{h + 1}.
+
+The reported standard errors are pointwise normal approximations
+  under valid identifying moments, adequate controls, moment/CLT conditions
+  and a suitable HAC bandwidth. They are not weak-instrument robust or
+  simultaneous path bands. For `make.jorda.irf`, the estimated impact-shock
+  standard deviation is treated as fixed in the reported standard errors.
 }
 \examples{
 data("USmonthly_1990_to_2012")

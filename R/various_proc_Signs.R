@@ -168,7 +168,7 @@ svar.signs <- function(Y,p,
 # if no bootstrap then simply use point estimate
     simulated.IRFs  <- replicate(1,IRFs, simplify="array")
     simulated.B.hat <- replicate(1,B.hat, simplify="array")
-    simulated.Phi   <- replicate(1,Phi, simplify="array")
+    simulated.Phi   <- matrix(rep(Phi,1L),nrow=p,ncol=1L)
 
 # if bootstrap then generate and store simulated IRFs, B.hat and Phi
   if(bootstrap.replications>1){
@@ -226,6 +226,8 @@ svar.signs <- function(Y,p,
   xx         <- signs.res$xx         # number of selected rotations
   IRFs.signs <- signs.res$IRFs.signs # Set of admissible IRFs
 
+  if (xx==0L) stop("No admissible rotations: check the restrictions or increase nb.draws")
+  all.CI.lower.bounds <- all.CI.upper.bounds <- all.CI.median <- all.stdv.IRFs <- vector("list",nb.shocks)
   for (j in 1:nb.shocks){
     # reshape the IRFs
     IRFs.signs.j <- IRFs.signs[,j,,]
@@ -252,30 +254,24 @@ svar.signs <- function(Y,p,
                                    function(x){quantile(x,0.5)}))
     }
 
+    all.CI.lower.bounds[[j]] <- all.CI.lower.bounds.j
+    all.CI.upper.bounds[[j]] <- all.CI.upper.bounds.j
+    all.CI.median[[j]] <- all.CI.median.j
+    all.stdv.IRFs[[j]] <- all.stdv.IRFs.j
   # Figure
     if(indic.plot==1){
         par(mfrow=c(2,
                     ifelse(round(n/2)==n/2,n/2,(n+1)/2)))
         for(i in 1:n){
-          plot(all.CI.median.j[,i],type="l",lwd=2,xlab="",ylab="",
+          plot(seq_len(nb.periods.IRF)-1L,all.CI.median.j[,i],type="l",lwd=2,xlab="",ylab="",
                ylim=c(min(all.CI.lower.bounds.j[,i]),
                       max(all.CI.upper.bounds.j[,i])),
                main=paste0("(",letters[i],") ",names.of.variables[i]))
           abline(h=0,col="grey")
-          lines(all.CI.lower.bounds.j[,i],col="grey45",lty=2,lwd=2)
-          lines(all.CI.upper.bounds.j[,i],col="grey45",lty=2,lwd=2)
+          lines(seq_len(nb.periods.IRF)-1L,all.CI.lower.bounds.j[,i],col="grey45",lty=2,lwd=2)
+          lines(seq_len(nb.periods.IRF)-1L,all.CI.upper.bounds.j[,i],col="grey45",lty=2,lwd=2)
       }
     }
-  }
-  all.CI.lower.bounds <- list()
-  all.CI.upper.bounds <- list()
-  all.CI.median       <- list()
-  all.stdv.IRFs       <- list()
-  for (j in 1:nb.shocks){
-    all.CI.lower.bounds[[j]] <- all.CI.lower.bounds.j
-    all.CI.upper.bounds[[j]] <- all.CI.upper.bounds.j
-    all.CI.median[[j]] <- all.CI.median.j
-    all.stdv.IRFs[[j]] <- all.stdv.IRFs.j
   }
 
   return(
@@ -316,11 +312,12 @@ svar.signs.aux <- function(Y,p,
   IRFs.draw <- list()
   B.hat.draw <- list()
   Phi.draw <- list()
-  for (l in bootstrap.replications){
+  for (l in seq_len(bootstrap.replications)){
     for(i in 1:nb.draws){
       A <- matrix(rnorm(n*n), nrow = n, ncol = n) # draw a random matrix
       AA <- qr(A)
-      Q <- qr.Q(AA, complete = FALSE) # use QR decomposition of A to compute Q
+      Q <- qr.Q(AA, complete = FALSE)
+      Q <- sweep(Q,2,sign(diag(qr.R(AA))),"*") # positive R diagonal: Haar measure
       ff <- 0
         for (shock in 1:nb.shocks){
           k <- NULL
@@ -330,7 +327,7 @@ svar.signs.aux <- function(Y,p,
             k <- cbind(k,kk)
           }
           # check if sign restrictions are satisfied
-        if (length(k) == rankMatrix(sign.restrictions[[shock]])[1]*length(horizon[[shock]]))
+        if (length(k) == sum(rowSums(abs(sign.restrictions[[shock]]))>0)*length(horizon[[shock]]))
           {ff <- ff+1}
       }
       if (ff==nb.shocks)
@@ -345,7 +342,7 @@ svar.signs.aux <- function(Y,p,
 
 
   IRFs.signs <- array(NaN,c(n,n,nb.periods.IRF,xx))
-   for (k in 1:xx){
+   for (k in seq_len(xx)){
      for (t in 1:nb.periods.IRF){
        IRFs.signs[,,t,k] <- IRFs.draw[[k]][,,t]%*%admissible.rotation[[k]]
     }
@@ -386,13 +383,13 @@ svar.signs.aux.recursive <- function(Y,p,
   IRFs.draw <- list()
   B.hat.draw <- list()
   Phi.draw <- list()
-  for (l in bootstrap.replications){
+  for (l in seq_len(bootstrap.replications)){
     for(i in 1:nb.draws){
       Q <- NULL # initialize Q
       ff <- 0
       for (shock in 1:nb.shocks){
         k <- NULL
-        a <- matrix(rnorm(n-shock+1,1), nrow = n-shock+1, ncol = 1)
+        a <- matrix(rnorm(n-shock+1), nrow = n-shock+1, ncol = 1)
         a <- a%*%solve((t(a)%*%a)^0.5)
         if (shock ==1){q <-a}else{
         q <- Null(Q)%*%a} # q is of length 1 and orthogonal to the vectors of Q
@@ -402,11 +399,11 @@ svar.signs.aux.recursive <- function(Y,p,
           k <- cbind(k,kk)
         }
         # check if sign restrictions are satisfied
-        if (length(k) == rankMatrix(sign.restrictions[[shock]])[1]*length(horizon[[shock]])){
+        if (length(k) == sum(rowSums(abs(sign.restrictions[[shock]]))>0)*length(horizon[[shock]])){
           ff <- ff+1
           Q <- cbind(Q,q) # update Q with the new vector q
         }
-        if (is.null(Q)){break}
+        if (ff != shock) break
       }
       if (ff==nb.shocks)
         {xx <- xx+1
@@ -421,7 +418,7 @@ svar.signs.aux.recursive <- function(Y,p,
 
 
   IRFs.signs <- array(NaN,c(n,n,nb.periods.IRF,xx))
-  for (k in 1:xx){
+  for (k in seq_len(xx)){
     for (t in 1:nb.periods.IRF){
       IRFs.signs[,,t,k] <- IRFs.draw[[k]][,,t]%*%admissible.rotation[[k]]
     }
@@ -463,27 +460,30 @@ svar.signs.aux.zeros <- function(Y,p,
   IRFs.draw <- list()
   B.hat.draw <- list()
   Phi.draw <- list()
-  for (l in bootstrap.replications){
+  for (l in seq_len(bootstrap.replications)){
     for(i in 1:nb.draws){
       Q <- NULL # initialize Q
       ff <- 0
       for (shock in 1:nb.shocks){
         k <- NULL
           J <- cbind(Q,t(SR.restrictions[[shock]]%*%simulated.B.hat[,,l]))
-          a <- matrix(rnorm(n-dim(J)[2],1), nrow = n-dim(J)[2], ncol = 1)
-          a <- a%*%solve((t(a)%*%a)^0.5)
-          q <- Null(J)%*%a # q is orthogonal to Q and satisfies the zero restrictions
+          basis <- Null(J)
+          if (ncol(basis)==0L) break
+          a <- matrix(rnorm(ncol(basis)),ncol=1)
+          a <- a/sqrt(sum(a^2))
+          q <- basis%*%a # null-space dimension depends on rank, not row count
+
         for (h in horizon[[shock]]){
           K <- sign.restrictions[[shock]]%*%simulated.IRFs[,,h,l]%*%q
           kk <- matrix(K[K >0], nrow=1)
           k <- cbind(k,kk)
         }
           # check if sign restrictions are satisfied
-        if (length(k) == rankMatrix(sign.restrictions[[shock]])[1]*length(horizon[[shock]])){
+        if (length(k) == sum(rowSums(abs(sign.restrictions[[shock]]))>0)*length(horizon[[shock]])){
           ff <- ff+1
           Q <- cbind(Q,q) # update Q
         }
-          if (is.null(Q)){break}
+          if (ff != shock) break
       }
       if (ff==nb.shocks)
         {xx <- xx+1
@@ -498,7 +498,7 @@ svar.signs.aux.zeros <- function(Y,p,
 
 
   IRFs.signs <- array(NaN,c(n,n,nb.periods.IRF,xx))
-  for (k in 1:xx){
+  for (k in seq_len(xx)){
     for (t in 1:nb.periods.IRF){
       IRFs.signs[,,t,k] <- IRFs.draw[[k]][,,t]%*%admissible.rotation[[k]]
     }

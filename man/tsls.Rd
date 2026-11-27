@@ -41,8 +41,8 @@ where \eqn{X} may be endogenous and \eqn{Z} is a matrix of instruments.
 set.seed(123)
 T <- 200
 
-Z <- matrix(rnorm(T * 2), T, 2)
-X <- cbind(1, Z[,1] + 0.5 * rnorm(T))
+Z <- cbind(1, rnorm(T))
+X <- cbind(1, Z[,2] + 0.5 * rnorm(T))
 Y <- X \%*\% c(1, 2) + rnorm(T)
 
 res <- tsls(Y = as.matrix(Y), X = X, Z = Z, q = 4)

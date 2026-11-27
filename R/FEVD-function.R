@@ -17,12 +17,14 @@
 #'   in plots.
 #' @param H1 Integer vectors (length `nb.shocks`). Start horizons
 #' for the FEV-maximization window of each shock.
-#' @param H2  Integer vectors (length `nb.shocks`). Start ends (inclusive)
+#' @param H2 Integer vectors (length `nb.shocks`). End horizons (inclusive)
 #' for the FEV-maximization window of each shock.
 #' @param variable Integer vector. 1-based indices of the
 #'   target variables whose FEV is maximized for each shock.
 #' @param norm Integer vector of length `nb.shocks`. For each shock, the horizon
-#'   at which its response is normalized to be positive.
+#'   IRF array index at which its response is normalized to be positive. Index
+#'   1 is impact (horizon zero). H1 and H2 instead count forecast steps: a
+#'   forecast of H steps uses response indices 1 through H.
 #' @param nb.periods.IRF Number of IRF horizons to compute.
 #' @param bootstrap.replications Number of parametric bootstrap
 #'   replications. If 1, returns point estimates only (no uncertainty).
@@ -92,7 +94,7 @@ svar.fevmax <- function(Y,p,
   # if no bootstrap then simply use point estimate
   simulated.IRFs  <- replicate(1,IRFs, simplify="array")
   simulated.B.hat <- replicate(1,B.hat, simplify="array")
-  simulated.Phi   <- replicate(1,Phi, simplify="array")
+  simulated.Phi   <- matrix(rep(Phi,1L),nrow=p,ncol=1L)
   # if bootstrap then generate and store simulated IRFs, B.hat and Phi
   if(bootstrap.replications>1){
     bootstrap.res <- param.bootstrap(Y,p,nb.periods.IRF,n,bootstrap.replications,
@@ -112,13 +114,13 @@ svar.fevmax <- function(Y,p,
     for(i in 1:nb.shocks){
       # Compute S
       WWW <- array(0,c(n-i+1,n-i+1))
-      for (h in H1[i]:H2[i]){
+      for (h in seq_len(H2[i])){
         V99 <- simulated.IRFs[,,h,l]%*%Q[,i:n,l]
         # Notice that we use only columns 2 to n of Q:
         #  the first column selects the TFP surprise shock,
         #  which is the first shock in the Cholesky
         #  decomposition where TFP is ordered first.
-        JJ <- (H2[i]+1-h)*t(V99)%*%E[[i]]%*%V99
+        JJ <- (H2[i]+1-max(H1[i],h))*t(V99)%*%E[[i]]%*%V99
         WWW <- WWW+JJ}
       r <- eigen(WWW)
       # Take the eigenvector with the highest eigenvalue
@@ -151,13 +153,13 @@ svar.fevmax <- function(Y,p,
     for (j in 1:nb.shocks){
       par(mfrow=c(2,ifelse(round(n/2)==n/2,n/2,(n+1)/2)))
       for(i in 1:n){
-        plot(CI.median[i,j,],type="l",lwd=2,xlab="",ylab="",
+        plot(seq_len(nb.periods.IRF)-1L,CI.median[i,j,],type="l",lwd=2,xlab="",ylab="",
              ylim=c(min(CI.lower.bounds[i,j,]),
                     max(CI.upper.bounds[i,j,])),
              main=paste0("(",letters[i],") ",names.of.variables[i]))
         abline(h=0,col="grey")
-        lines(CI.lower.bounds[i,j,],col="grey45",lty=2,lwd=2)
-        lines(CI.upper.bounds[i,j,],col="grey45",lty=2,lwd=2)}
+        lines(seq_len(nb.periods.IRF)-1L,CI.lower.bounds[i,j,],col="grey45",lty=2,lwd=2)
+        lines(seq_len(nb.periods.IRF)-1L,CI.upper.bounds[i,j,],col="grey45",lty=2,lwd=2)}
     }
   }
 

@@ -19,7 +19,7 @@ Install the checked, tagged release:
 
 ```r
 install.packages("remotes")
-remotes::install_github("jrenne/IdSS", ref = "v0.3.0")
+remotes::install_github("jrenne/IdSS", ref = "v0.3.1")
 library(IdSS)
 ```
 

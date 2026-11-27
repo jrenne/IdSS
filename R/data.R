@@ -24,14 +24,17 @@
 
 #' International Quarterly Macroeconomic Data
 #'
-#' Quarterly CPI and real-GDP series, together with selected short-term interest
+#' Quarterly real-GDP growth and annual CPI inflation, with selected short-term interest
 #' rates, for Australia, Canada, Switzerland, the United Kingdom, Indonesia,
 #' India, Japan, Korea, and the United States.
 #'
 #' @format A data frame with 279 observations and 35 variables. `date` is a
 #'   `Date`. Country suffixes use ISO-like three-letter codes. Variables beginning
-#'   with `CPI_`, `GDP_`, and `GDP1Y_` contain consumer prices, real GDP, and
-#'   annual real-GDP growth; `STR_` variables contain short-term rates.
+#'   with `CPI_` contain arithmetic percent CPI changes from a year earlier.
+#'   `GDP_` contains arithmetic percent real-GDP changes from the preceding
+#'   quarter; `GDP1Y_` contains changes from a year earlier. These are growth
+#'   rates, not levels or log changes. `STR_` variables contain nominal
+#'   short-term interest rates in annual percent.
 #' @details **Redistribution status:** permitted with attribution under the
 #'   OECD data terms, subject to any series-specific or third-party restriction.
 #'   The archived workbook identifies the included series as OECD series. See

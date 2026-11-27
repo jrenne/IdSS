@@ -25,7 +25,8 @@ of IRFs organised as variables x shocks x horizons x IRF draw.
 \details{
 We must have that the number of variables is equal to the number of shocks. Hence,
 IRFs has 4 dimensions. If there is only one draw (e.g. estimated model)
-, then IRFs has only 3 dimensions.
+, then IRFs may have only 3 dimensions. For a single draw, the returned
+arrays omit the singleton draw dimension, even when the input is 4-dimensional.
 }
 \examples{
 # A two-variable model with two independent structural shocks.

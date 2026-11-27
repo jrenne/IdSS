@@ -33,14 +33,16 @@ in plots.}
 \item{H1}{Integer vectors (length `nb.shocks`). Start horizons
 for the FEV-maximization window of each shock.}
 
-\item{H2}{Integer vectors (length `nb.shocks`). Start ends (inclusive)
+\item{H2}{Integer vectors (length `nb.shocks`). End horizons (inclusive)
 for the FEV-maximization window of each shock.}
 
 \item{variable}{Integer vector. 1-based indices of the
 target variables whose FEV is maximized for each shock.}
 
 \item{norm}{Integer vector of length `nb.shocks`. For each shock, the horizon
-at which its response is normalized to be positive.}
+IRF array index at which its response is normalized to be positive. Index
+1 is impact (horizon zero). H1 and H2 instead count forecast steps: a
+forecast of H steps uses response indices 1 through H.}
 
 \item{nb.periods.IRF}{Number of IRF horizons to compute.}
 
