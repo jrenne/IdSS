@@ -19,7 +19,7 @@ Install the checked, tagged release:
 
 ```r
 install.packages("remotes")
-remotes::install_github("jrenne/IdSS", ref = "v0.3.1")
+remotes::install_github("jrenne/IdSS", ref = "v0.3.2")
 library(IdSS)
 ```
 
@@ -30,6 +30,7 @@ help(package = "IdSS")
 ?sim.arma
 ?svar.ordering
 ?USmonthly
+?USmonetaryRR
 ?ms_filter
 ?fit_msar
 ?kf_filter
@@ -50,6 +51,12 @@ likewise been replaced by `eurusd`, a public-domain Federal Reserve H.10 series
 retrieved through FRED. The uncleared `levpan` extract has been replaced by
 `USsentiment`, an independently rebuilt U.S. dataset using public-sector data
 and Fernald's noncommercial, attribution-required TFP series.
+
+The `USmonetaryRR` dataset supplies the extended Romer--Romer instrument,
+policy rate, unemployment and PCE inflation used by the LP-IV chapter. Its help
+page documents all five variables, archived vintages, identification limits and
+the official source repository's CC0 licence. Installed source evidence is at
+`system.file("data-sources", "USmonetaryRR", package = "IdSS")`.
 
 ## Development checks
 

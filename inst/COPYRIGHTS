@@ -11,4 +11,9 @@ data, used in `USsentiment`, may be reproduced with attribution for
 noncommercial purposes. Other data have the source-specific terms recorded in
 the dataset register.
 
+USmonetaryRR is an extraction of the official Jorda--Taylor replication data
+under CC0 1.0; it retains the extended Romer--Romer instrument and public-sector
+macroeconomic inputs. Preserve source and scholarly credits. The licence and
+provenance record are installed in data-sources/USmonetaryRR/.
+
 See DATA-SOURCES.md in the installed package for the dataset-by-dataset audit.

@@ -17,7 +17,8 @@
 #' a restricted licence, hold pending permission, and remove/replace. A public
 #' release should contain only cleared data.
 #'
-#' @seealso [data()] and the individual dataset help pages, for example [JST],
-#'   [QuarterlyUS], and [USmonthly].
+#' @seealso \code{\link{data}} and the individual dataset help pages, for example
+#'   \code{\link{JST}}, \code{\link{QuarterlyUS}}, \code{\link{USmonthly}} and
+#'   \code{\link{USmonetaryRR}}.
 #' @name IdSS-data-licensing
 NULL

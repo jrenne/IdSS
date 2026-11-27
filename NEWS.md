@@ -1,4 +1,9 @@
-# IdSS (development version)
+# IdSS 0.3.2
+
+- Add USmonetaryRR, 466 documented monthly observations for a strong-proxy
+  LP-IV teaching application; ship CC0 evidence and frozen-source provenance.
+  Preserve all previous observations, exports and function interfaces.
+
 
 - Organize source files by method and consistently format R code and examples.
 - Remove unused internal experiments and the unnecessary stringr dependency.

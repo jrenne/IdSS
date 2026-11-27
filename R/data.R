@@ -214,3 +214,76 @@
 #'   to Euro Spot Exchange Rate [DEXUSEU], retrieved from FRED, Federal Reserve
 #'   Bank of St. Louis, \url{https://fred.stlouisfed.org/series/DEXUSEU}.
 "eurusd"
+
+#' U.S. Narrative Monetary-Policy Shocks and Macroeconomic Outcomes
+#'
+#' Frozen monthly data for the local-projection instrumental-variable example
+#' in the Structural Shocks course. The instrument is the extended Romer--Romer
+#' narrative shock distributed in the official Jorda--Taylor replication data.
+#'
+#' @format A data frame with 466 consecutive monthly observations and five columns:
+#' \describe{
+#'   \item{date}{First day of the observation month, a \code{Date}, from
+#'     March 1969 through December 2007.}
+#'   \item{policy_rate}{Effective federal funds rate, percent per annum;
+#'     source variable \code{ffr}, equal to \code{FEDFUNDS} in the archive.}
+#'   \item{unemployment}{U.S. civilian unemployment rate, percent;
+#'     source variable \code{urate}, equal to \code{UNRATE} in the archive.}
+#'   \item{inflation}{Annualized monthly PCE inflation, in percent:
+#'     approximately \eqn{1200\Delta\log(PCEPI)}. The source's stored
+#'     floating-point rounding is retained. This is not twelve-month inflation.}
+#'   \item{rr_shock}{Extended Romer--Romer narrative monetary-policy-shock
+#'     measure, source variable \code{RRCGShock}, retained in the source
+#'     authors' normalization without standardization or additional scaling.
+#'     This is an instrument, not an observed target-rate change. Its scale
+#'     does not determine the normalization of a just-identified LP-IV response.}
+#' }
+#' @details The extraction selects five columns of
+#'   \code{Example6_JointInference/data_fred.dta} from the official author
+#'   repository at commit \code{655696c1c576b7537c5a939d2c261f0a111ae663}.
+#'   It converts dates and renames columns, without filling missing values,
+#'   deleting interior months, revising observations or seasonal adjustment.
+#'   The resulting window has no missing values. These are the archived
+#'   replication vintages, not freshly downloaded current-vintage FRED data.
+#'
+#'   \strong{Redistribution:} the official author repository applies CC0 1.0.
+#'   The licence text, upstream README and checksum/provenance record are
+#'   installed in \code{data-sources/USmonetaryRR}. Credit Jorda and Taylor,
+#'   Romer and Romer, Coibion and coauthors, the Federal Reserve Board, BLS and
+#'   FRED. The IdSS software's MIT licence does not replace the data notice.
+#'
+#'   A causal interpretation requires narrative-shock exclusion and lead-lag
+#'   exogeneity after conditioning on the chosen controls, as well as relevance.
+#'   A strong first stage is not an exclusion test. Responses can depend on the
+#'   sample and control specification. The course's 1969--2007, twelve-lag
+#'   LP-IV calculation is a new R implementation using these data, not an exact
+#'   replication of the joint-GMM estimator or sample in the original Example 6.
+#' @source Official Jorda--Taylor replication repository,
+#'   \url{https://github.com/ojorda/JEL-Code};
+#'   \url{https://doi.org/10.3886/E208590V1}.
+#'   The source README identifies the extended narrative shock and the FRED
+#'   macroeconomic series. An offline builder and optional upstream extractor
+#'   are provided in the source repository's \code{data-raw/USmonetaryRR/}.
+#' @references Jorda, O. and Taylor, A. M. (2025). Local Projections.
+#'   \emph{Journal of Economic Literature}, 63(1), 59--110.
+#'   \doi{10.1257/jel.20241521}.
+#'
+#'   Romer, C. D. and Romer, D. H. (2004). A New Measure of Monetary Shocks:
+#'   Derivation and Implications. \emph{American Economic Review}, 94(4),
+#'   1055--1084. \doi{10.1257/0002828042002651}.
+#'
+#'   Coibion, O., Gorodnichenko, Y., Kueng, L. and Silvia, J. (2017).
+#'   Innocent Bystanders? Monetary Policy and Inequality.
+#'   \emph{Journal of Monetary Economics}, 88, 70--89.
+#'   \doi{10.1016/j.jmoneco.2017.05.005}.
+#' @examples
+#' data("USmonetaryRR", package = "IdSS")
+#' head(USmonetaryRR)
+#' range(USmonetaryRR$date)
+#' plot(USmonetaryRR$date, USmonetaryRR$unemployment,
+#'   type = "l", xlab = "Month", ylab = "Unemployment (percent)"
+#' )
+#' stopifnot(nrow(USmonetaryRR) == 466L, !anyNA(USmonetaryRR))
+#' @seealso \code{\link{make.LPIV.irf}}, \code{\link{svar.iv}},
+#'   \code{\link{USmonthly}}
+"USmonetaryRR"

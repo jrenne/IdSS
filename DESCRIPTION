@@ -1,7 +1,7 @@
 Package: IdSS
 Type: Package
 Title: Identification and Analysis of Dynamic Structural Shocks
-Version: 0.3.1
+Version: 0.3.2
 Authors@R: c(
     person("Kenza", "Benhima", role = "aut"),
     person("Jean-Paul", "Renne", email = "jean-paul.renne@unil.ch",

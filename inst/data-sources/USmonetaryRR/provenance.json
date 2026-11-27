@@ -1,0 +1,24 @@
+{
+  "source": "Jorda and Taylor, Local Projections, JEL 2025, Example6_JointInference/data_fred.dta",
+  "url": "https://github.com/ojorda/JEL-Code/tree/655696c1c576b7537c5a939d2c261f0a111ae663",
+  "archive_sha256": "8fa0ad974eda885e7fc9570b601ca619f4b6216d6605cd2e8e1c7f2fbac246f6",
+  "archive_git_blob_sha1": "00761116ad295b197886879dd1946b8a9c61781c",
+  "stata_file_sha256": "08a1225f1a2d5b5d2bebfa18d30d443b7611fe46ab368605180f26598cb6d726",
+  "extract_sha256": "3642605ea462730a9a3c7e6090f00996da49e065af8d2f3d8bbcd7905e3b7054",
+  "licence": "CC0-1.0, official author repository LICENSE; no additional restrictions stated in Example 6 README",
+  "upstream_sources": [
+    "Romer-Romer narrative monetary shocks extended by Coibion, Gorodnichenko, Kueng and Silvia (2017)",
+    "Federal Reserve Board FEDFUNDS and PCEPI; BLS UNRATE, through FRED"
+  ],
+  "transformation": "Extract dates 1969-03 through 2007-12 and five columns, rename variables, convert Stata dates to ISO. No observations imputed or interior months deleted.",
+  "units": {
+    "policy_rate": "percent per annum",
+    "unemployment": "percent",
+    "inflation": "annualized monthly PCE inflation, approximately 1200*diff(log(PCEPI)); source float rounding retained",
+    "rr_shock": "source RRCGShock units"
+  },
+  "rows": 466,
+  "object": "USmonetaryRR",
+  "retrieved": "2026-11-27",
+  "csv_md5": "eed207f3cf12a5a8afce4e0742c3b5da"
+}

@@ -17,7 +17,7 @@ test_that("all course datasets are installed", {
   required <- c(
     "BQ", "eurusd", "international", "JST", "USsentiment", "QuarterlyUS",
     "US_CH_quarterly", "US3var", "USmonthly",
-    "USmonthly_1990_to_2012", "USmonthlyExample", "USyields"
+    "USmonthly_1990_to_2012", "USmonthlyExample", "USyields", "USmonetaryRR"
   )
   available <- data(package = "IdSS")$results[, "Item"]
   expect_true(all(required %in% available))
@@ -30,7 +30,7 @@ test_that("every installed dataset appears in the provenance register", {
   required <- c(
     "BQ", "eurusd", "international", "JST", "USsentiment", "QuarterlyUS",
     "US_CH_quarterly", "US3var", "USmonthly",
-    "USmonthly_1990_to_2012", "USmonthlyExample", "USyields"
+    "USmonthly_1990_to_2012", "USmonthlyExample", "USyields", "USmonetaryRR"
   )
   expect_true(all(vapply(required, function(x) {
     grepl(paste0("`", x, "`"), text, fixed = TRUE)

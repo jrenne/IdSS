@@ -1,7 +1,7 @@
 # Data sources, transformations, and redistribution status
 
 This file records the provenance and redistribution status of every dataset
-shipped with IdSS. It is an audit of the package contents as of 10 October
+shipped with IdSS. It is an audit of the package contents as of 27 November
 2026; it is not legal advice. The MIT licence in `DESCRIPTION` applies to the
 IdSS software, not automatically to third-party data.
 
@@ -31,8 +31,13 @@ Status labels used below:
 | `US3var` | 224 quarterly observations, 1959 Q2–2015 Q1. U.S. government series on GDP, potential GDP, unemployment, the natural rate, prices, the federal funds rate, and oil prices are merged; output and unemployment gaps, inflation, and commodity-price growth are computed. | BEA, BLS, CBO, Federal Reserve Board, and U.S. Energy Information Administration series archived from FRED. Cite the original agencies and FRED. | **CLEARED — attribution required**, provided the raw inputs remain the identified U.S. government series. |
 | `USmonthly`, `USmonthlyExample`, `USmonthly_1990_to_2012` | Monthly U.S. activity, labour-market, price, monetary, reserve, interest-rate, and credit-risk series. Logs and first differences are computed where documented; three date windows are retained. `BRW` is the monthly Bu–Rogers–Wu monetary-policy shock and begins in 1994. | Board of Governors, BLS, and other U.S. government series retrieved through FRED; Bu, Rogers, and Wu shock series and Favara–Gilchrist–Lewis–Zakrajšek EBP downloaded from the Board of Governors. Cite the original series, FRED, and the corresponding research papers. | **CLEARED — attribution required.** The Board states that its website information is public domain unless otherwise indicated; the remaining inputs are U.S. government series. |
 | `USyields` | 385 monthly observations, 1990–2022. Daily Treasury constant-maturity series `DGS1`, `DGS2`, `DGS3`, `DGS5`, `DGS7`, `DGS10`, `DGS20`, and `DGS30` are averaged by month. | Board of Governors of the Federal Reserve System, H.15 Selected Interest Rates, retrieved from FRED. | **CLEARED — attribution required.** FRED labels these series “Public Domain: Citation Requested.” |
+| `USmonetaryRR` | 466 consecutive monthly observations, 1969-03--2007-12. Five columns are extracted from the official Jorda--Taylor Example 6 archive: dates, federal funds rate, unemployment, annualized monthly PCE inflation and the extended Romer--Romer shock. Only dates, names and the date window change; no imputation or new-vintage replacement. | Jorda and Taylor (2025), official repository commit `655696c1c576b7537c5a939d2c261f0a111ae663`; Romer and Romer (2004), extension by Coibion, Gorodnichenko, Kueng and Silvia (2017); Federal Reserve Board, BLS and FRED macroeconomic inputs. Retain these scholarly/source credits. | **CLEARED -- CC0-1.0.** The official author repository applies CC0 1.0. Installed `data-sources/USmonetaryRR/` contains the licence, upstream README and frozen-source hashes; no additional restrictions are stated in the Example 6 README. |
 
 ## Source terms consulted
+
+- Official Jorda--Taylor replication repository and CC0 licence:
+  <https://github.com/ojorda/JEL-Code/tree/655696c1c576b7537c5a939d2c261f0a111ae663>
+  and <https://github.com/ojorda/JEL-Code/blob/655696c1c576b7537c5a939d2c261f0a111ae663/LICENSE>
 
 - FRED Services Terms of Use and FAQ:
   <https://fred.stlouisfed.org/legal>
